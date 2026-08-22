@@ -1,0 +1,15 @@
+# Downloaded source data and generated pipeline batches
+data/*.csv
+data/*.pdf
+generated-data/
+
+# Keep source documentation versioned
+!data/README.md
+
+# Local credentials and tool state
+.env
+.venv/
+node_modules/
+target/
+dbt_packages/
+logs/

@@ -1,0 +1,57 @@
+-- Milestone 0: custom role hierarchy.
+-- Run from an authenticated human session that can switch to SECURITYADMIN.
+
+USE ROLE SECURITYADMIN;
+
+CREATE ROLE IF NOT EXISTS WELLBEING_DEMO_ADMIN
+  COMMENT = 'Owns and administers the isolated school wellbeing demo';
+
+CREATE ROLE IF NOT EXISTS WELLBEING_DEMO_LOADER
+  COMMENT = 'Loads immutable source batches into RAW';
+
+CREATE ROLE IF NOT EXISTS WELLBEING_DEMO_TRANSFORMER
+  COMMENT = 'Builds tested dbt models from RAW to MARTS';
+
+CREATE ROLE IF NOT EXISTS WELLBEING_DEMO_TRUST_NORTH_READER
+  COMMENT = 'Reads north tenant secure views only';
+
+CREATE ROLE IF NOT EXISTS WELLBEING_DEMO_TRUST_SOUTH_READER
+  COMMENT = 'Reads south tenant secure views only';
+
+-- The admin role inherits each narrowly scoped runtime role.
+GRANT ROLE WELLBEING_DEMO_LOADER
+  TO ROLE WELLBEING_DEMO_ADMIN;
+GRANT ROLE WELLBEING_DEMO_TRANSFORMER
+  TO ROLE WELLBEING_DEMO_ADMIN;
+GRANT ROLE WELLBEING_DEMO_TRUST_NORTH_READER
+  TO ROLE WELLBEING_DEMO_ADMIN;
+GRANT ROLE WELLBEING_DEMO_TRUST_SOUTH_READER
+  TO ROLE WELLBEING_DEMO_ADMIN;
+
+-- Snowflake recommends placing custom roles beneath SYSADMIN.
+GRANT ROLE WELLBEING_DEMO_ADMIN
+  TO ROLE SYSADMIN;
+
+-- The demo admin needs these privileges to create the isolated database and
+-- warehouses in the next setup step. They do not grant access to existing
+-- databases or warehouses. Snowflake requires ACCOUNTADMIN to delegate the
+-- global CREATE DATABASE privilege.
+USE ROLE ACCOUNTADMIN;
+
+GRANT CREATE DATABASE ON ACCOUNT
+  TO ROLE WELLBEING_DEMO_ADMIN;
+GRANT CREATE WAREHOUSE ON ACCOUNT
+  TO ROLE WELLBEING_DEMO_ADMIN;
+
+-- Give the human user running this script access to the custom admin role.
+SET DEMO_BOOTSTRAP_USER = CURRENT_USER();
+GRANT ROLE WELLBEING_DEMO_ADMIN
+  TO USER IDENTIFIER($DEMO_BOOTSTRAP_USER);
+
+-- Verification output.
+SHOW ROLES LIKE 'WELLBEING_DEMO%';
+SHOW GRANTS TO ROLE WELLBEING_DEMO_ADMIN;
+SHOW GRANTS TO ROLE WELLBEING_DEMO_LOADER;
+SHOW GRANTS TO ROLE WELLBEING_DEMO_TRANSFORMER;
+SHOW GRANTS TO ROLE WELLBEING_DEMO_TRUST_NORTH_READER;
+SHOW GRANTS TO ROLE WELLBEING_DEMO_TRUST_SOUTH_READER;
