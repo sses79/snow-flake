@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: raw
+    database: SCHOOL_WELLBEING_DEMO
+    schema: RAW
+    tables:
+      - name: mongo_wellbeing_submissions
+        columns:
+          - name: envelope
+            data_tests: [not_null]
+          - name: source_file
+            data_tests: [not_null]
+          - name: source_file_row_number
+            data_tests: [not_null]

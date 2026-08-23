@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: stg_wellbeing_submission_changes
+    description: Typed immutable source changes; invalid typed values fail the build.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+      - name: document_id
+        data_tests: [not_null]
+      - name: operation
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [upsert, delete]
+      - name: source_version
+        data_tests: [not_null]
+      - name: source_updated_at
+        data_tests: [not_null]
+      - name: trust_id
+        data_tests: [not_null]
+      - name: school_id
+        data_tests: [not_null]
+      - name: survey_period
+        data_tests: [not_null]

@@ -1,0 +1,23 @@
+name: school_wellbeing_demo
+version: 1.0.0
+config-version: 2
+profile: school_wellbeing_demo
+
+model-paths: ["models"]
+test-paths: ["tests"]
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  school_wellbeing_demo:
+    staging:
+      +schema: staging
+      +materialized: view
+    intermediate:
+      +schema: staging
+      +materialized: view
+    core:
+      +schema: core
+      +materialized: table
+    marts:
+      +schema: marts
+      +materialized: table

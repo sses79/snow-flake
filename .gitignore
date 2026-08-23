@@ -13,3 +13,4 @@ node_modules/
 target/
 dbt_packages/
 logs/
+dbt/.user.yml
