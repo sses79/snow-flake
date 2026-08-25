@@ -14,7 +14,11 @@ only aggregated, non-diagnostic wellbeing indicators.
 - [80/20 Snowflake learning guide](snowflake-learning-guide.md)
 - [Demo architecture and delivery plan](demo-project-plan.md)
 - [Milestone 0: account connection and guardrails](docs/milestone-0-account-setup.md)
+- [Milestone 0: 80/20 learning guide](docs/milestone-0-learning-guide.md)
+- [Milestone 1: first source-to-mart vertical slice](docs/milestone-1-vertical-slice.md)
+- [Milestone 1: 80/20 learning guide](docs/milestone-1-learning-guide.md)
 - [Dataset profile and handling rules](data/README.md)
+- [Power BI dashboard runbook](docs/power-bi-dashboard.md)
 
 ## Current status
 
@@ -23,7 +27,9 @@ hierarchy, workload-specific warehouses, raw loading objects, least-privilege
 grants, and cost monitor are defined as rerunnable SQL in
 [`infra/snowflake`](infra/snowflake).
 
-Milestone 1 will build the first source-to-mart vertical slice.
+Milestone 1 is implemented: the checked source is deterministically adapted to
+a manifest-backed NDJSON micro-batch, loaded through the internal stage, and
+transformed by tested dbt models into a school wellbeing trend mart.
 
 ## Source data
 

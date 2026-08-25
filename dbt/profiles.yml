@@ -1,0 +1,14 @@
+school_wellbeing_demo:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      authenticator: "{{ env_var('SNOWFLAKE_AUTHENTICATOR', 'externalbrowser') }}"
+      role: WELLBEING_DEMO_TRANSFORMER
+      database: "{{ env_var('SNOWFLAKE_DATABASE', 'SCHOOL_WELLBEING_DEMO') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_TRANSFORM_WAREHOUSE', 'WELLBEING_DEMO_TRANSFORM_WH') }}"
+      schema: STAGING
+      threads: 4
+      client_session_keep_alive: false

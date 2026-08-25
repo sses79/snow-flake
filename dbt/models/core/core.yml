@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: fct_wellbeing_response
+    description: One row per current submission and curated survey question; no source respondent identifier is retained.
+    columns:
+      - name: document_id
+        data_tests: [not_null]
+      - name: trust_id
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [trust_north, trust_south]
+      - name: school_id
+        data_tests: [not_null]
+      - name: question_code
+        data_tests: [not_null]

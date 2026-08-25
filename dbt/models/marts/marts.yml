@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: mart_school_wellbeing_trend
+    description: Auditable school wellbeing indicators by fictional school and survey period.
+    columns:
+      - name: trust_id
+        data_tests: [not_null]
+      - name: school_id
+        data_tests: [not_null]
+      - name: survey_period
+        data_tests: [not_null]
+      - name: question_code
+        data_tests: [not_null]
+      - name: eligible_submission_count
+        data_tests: [not_null]

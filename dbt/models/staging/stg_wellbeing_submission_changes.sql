@@ -1,0 +1,23 @@
+select
+  envelope:event_id::string as event_id,
+  envelope:collection::string as collection_name,
+  envelope:document_id::string as document_id,
+  envelope:operation::string as operation,
+  envelope:source_version::number as source_version,
+  envelope:source_updated_at::timestamp_tz as source_updated_at,
+  envelope:extracted_at::timestamp_tz as extracted_at,
+  envelope:batch_id::string as batch_id,
+  envelope:region::string as region,
+  envelope:schema_version::string as schema_version,
+  envelope:payload:trust_id::string as trust_id,
+  envelope:payload:school_id::string as school_id,
+  envelope:payload:school_classification::string as school_classification,
+  envelope:payload:year_group::string as year_group,
+  envelope:payload:survey_period::string as survey_period,
+  envelope:payload:submitted_at::timestamp_tz as submitted_at,
+  envelope:payload:answers as answers,
+  source_file,
+  source_file_row_number,
+  loaded_at,
+  load_run_id
+from {{ source('raw', 'mongo_wellbeing_submissions') }}

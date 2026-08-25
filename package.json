@@ -1,0 +1,13 @@
+{
+  "name": "snowflake-school-wellbeing-demo",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "generate": "node apps/generator/src/cli.ts",
+    "test": "node --test apps/generator/test/*.test.ts",
+    "typecheck": "node --run generate -- --help"
+  }
+}
