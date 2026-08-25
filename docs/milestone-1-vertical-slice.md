@@ -33,6 +33,44 @@ manifest count against raw rows, and runs all dbt models and tests. Snowflake's
 normal COPY load-history behavior makes rerunning the same staged filename a
 no-op; mutation-level idempotency is added in Milestone 2.
 
+## Data shape and row expansion
+
+The source CSV contains 569 columns and 21,954 response rows. The generated
+manifest retains a 569-entry data dictionary for source traceability. The
+number `530` in the generator is not the dictionary size: it is the zero-based
+CSV position of the final selected question,
+`healthy_lifestyle_encouragement`, and therefore identifies the 531st column.
+
+Milestone 1 curates 18 wellbeing question columns. The deterministic compressed
+NDJSON batch contains 21,954 lines, with one event per source response and an
+`answers` object containing those 18 question keys. `PUT` uploads that single
+batch file to the internal stage, and `COPY` loads one complete JSON event into
+the raw table per line:
+
+```text
+source CSV
+  569 columns x 21,954 response rows
+       |
+       | select 18 wellbeing questions
+       v
+batch_m1_*.ndjson.gz
+  21,954 events, each with 18 answer keys
+       |
+       | PUT to stage, then COPY
+       v
+RAW.MONGO_WELLBEING_SUBMISSIONS
+  21,954 rows, one event per ENVELOPE
+       |
+       | dbt lateral flatten of answers
+       v
+CORE.FCT_WELLBEING_RESPONSE
+  395,172 rows (21,954 x 18)
+```
+
+Blank answers still retain their question key. dbt therefore creates the fact
+row with a null `answer_value`, allowing the mart to distinguish missing from
+answered responses instead of silently dropping the question.
+
 ## Product question
 
 This query identifies fictional schools whose adverse-response rate increased

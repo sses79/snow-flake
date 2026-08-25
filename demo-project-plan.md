@@ -29,6 +29,19 @@ The source is a public survey dataset, augmented only with clearly labelled fict
 
 ## 2. Delivery strategy
 
+### Current delivery status
+
+| Milestone | Status | Evidence |
+|---|---|---|
+| Milestone 0 — account connection and guardrails | Complete | Rerunnable Snowflake bootstrap, least-privilege roles, workload warehouses, and cost monitor |
+| Milestone 1 — first source-to-mart vertical slice | Complete | Deterministic 21,954-event batch, tested dbt mart, tenant-safe secure views, and a published Power BI trend report |
+| Milestone 2 — incremental correctness | Next | Mutation batches, incremental models, and full-refresh equivalence remain to be implemented |
+| Milestones 3–5 | Planned | Product surface, governance evidence, and AWS ingestion extension remain deliberately deferred |
+
+The Power BI report is an early validation of the Milestone 1 mart and secure
+reader boundary. It does not replace Milestone 3's Next.js dashboard or
+Milestone 4's row-access policy, cohort suppression, and health evidence.
+
 Use two interchangeable ingestion modes:
 
 ```text
@@ -83,7 +96,7 @@ Because Kaggle labels the license as “Other” and attributes an upstream sour
 | Snowflake client | Snowflake CLI for setup/local `PUT`; official Node.js driver for the app | Separates operator workflows from runtime queries |
 | Warehouse layers | `RAW`, `STAGING`, `CORE`, `MARTS`, `GOVERNANCE` | Clear ownership and least-privilege boundaries |
 | Transformation | dbt Core with `dbt-snowflake` | Versioned models, incremental logic, tests, documentation, and lineage |
-| Dashboard | Next.js + server-side Snowflake queries + Recharts | Small TypeScript product surface; credentials never reach the browser |
+| Product surfaces | Power BI Service for early mart validation; Next.js + server-side Snowflake queries + Recharts in Milestone 3 | Proves the semantic layer early while retaining a small code-owned product surface later |
 | Testing | Vitest for TypeScript, dbt data/schema tests, SQL policy tests | Covers contracts, transformations, idempotency, and tenant isolation |
 | Automation | Makefile for local commands; GitHub Actions after the vertical slice | Low-friction developer workflow before adding CI |
 | AWS extension | S3, SQS, Snowpipe auto-ingest; Terraform | Demonstrates a production-shaped event-driven ingestion route |
@@ -111,7 +124,10 @@ apps/generator
                                  v
               STAGING -> CORE -> MARTS -> secure views
                                              |
-                                      apps/dashboard
+                         +----------------+----------------+
+                         |                                 |
+                  Power BI Service                  apps/dashboard
+                  secure view import               Milestone 3 API/UI
 ```
 
 ### Workload separation
@@ -207,6 +223,15 @@ The first version does not need slowly changing dimensions. Add history only as 
 - `mart_trust_benchmark`: trust-level indicator rates with cohorts below 10 suppressed.
 - `mart_pipeline_health`: most recent source/load/model timestamps, row reconciliation, rejects, and last successful dbt build.
 
+Milestone 1 also exposes object-specific secure views for external readers:
+
+- `mart_trust_north_school_wellbeing_trend`: north rows only;
+- `mart_trust_south_school_wellbeing_trend`: south rows only.
+
+The shared `mart_school_wellbeing_trend` table is not granted to reader roles.
+Schema-wide `ALL VIEWS` and `FUTURE VIEWS` grants are deliberately avoided so
+one tenant role cannot inherit access to the other tenant's view.
+
 Later, source-backed marts may add:
 
 - `mart_attendance_barriers`: reported absence or missed lessons for non-illness reasons, clearly labelled as self-reported survey data.
@@ -232,8 +257,10 @@ Implementation:
 
 - Loader can write only to `RAW` and use the load warehouse/stage.
 - Transformer can read `RAW` and build downstream schemas.
-- Reader roles can select only secure views in `MARTS`.
-- A row-access policy maps `CURRENT_ROLE()` to `trust_id` for the two demo tenants.
+- Reader roles can select only their object-specific secure view in `MARTS`.
+- Milestone 4 will add a row-access policy that maps `CURRENT_ROLE()` to
+  `trust_id`; the current secure views already enforce the two-tenant demo
+  boundary without exposing the shared mart table.
 - A source row identifier is transformed into a stable pseudonym before `CORE`; direct identifiers, if discovered during profiling, do not enter marts.
 - Free text is generated only to prove it is excluded from curated layers.
 - Benchmark rows with `respondent_count < 10` return no sensitive metric.
@@ -291,6 +318,8 @@ Gate:
 
 ### Milestone 1 — first source-to-mart vertical slice
 
+Status: **complete (2026-08-25)**.
+
 Build:
 
 - Validate the source checksum, reconstruct its two-row header, and enforce the documented 21,954-response reconciliation check.
@@ -298,14 +327,35 @@ Build:
 - Produce one NDJSON batch and manifest.
 - Upload it to the internal stage and `COPY INTO RAW.MONGO_WELLBEING_SUBMISSIONS`.
 - Build the staging model, latest/current submission logic, response fact, and school wellbeing mart.
+- Create north-only and south-only secure trend views with object-specific
+  reader grants.
+- Validate the north view through Power BI Service using key-pair
+  authentication and save the synthetic-data trend report to the demo
+  workspace.
 
 Gate:
 
 - `make demo-reset && make demo-build` creates a tested mart from an empty demo database.
 - Manifest count equals raw change count.
 - One documented SQL query answers the product question.
+- The Power BI connector authenticates with RSA key-pair credentials and reads
+  only the north secure view.
+- Each reader role is denied access to the other tenant's view, and rerunning
+  the tenant-view SQL does not widen grants.
+
+Implementation notes:
+
+- Run `infra/snowflake/05_tenant_reader_views.sql` after dbt builds the shared
+  mart.
+- Enter the full Snowflake server hostname in lowercase in Power BI. The ADBC
+  connection path returned a generic `Invalid credentials` error for the same
+  valid hostname in uppercase.
+- The repeatable connection, report, and troubleshooting steps are recorded in
+  [`docs/power-bi-dashboard.md`](docs/power-bi-dashboard.md).
 
 ### Milestone 2 — incremental correctness
+
+Status: **next**.
 
 Build four small mutation batches:
 
@@ -408,9 +458,9 @@ The core demo is complete at Milestone 4. Milestone 5 is an infrastructure exten
 
 The repository is done when a new developer can follow the README, connect their own Snowflake account, run a reset/build command, reproduce all mutation scenarios, pass the tests, and deliver the five-minute demo without undocumented manual fixes.
 
-## 13. First implementation slice
+## 13. First implementation slice — completed
 
-Implement these pieces first, in order:
+The first source-to-mart slice was delivered in this order:
 
 1. Repository scaffold and secret-safe configuration.
 2. Kaggle download instructions, gitignored input directory, checksum/attribution file, and a profiling command.
@@ -419,5 +469,9 @@ Implement these pieces first, in order:
 5. Internal-stage upload/load command.
 6. `stg_wellbeing_submission_changes`, `int_wellbeing_submission_latest`, `fct_wellbeing_response`, and `mart_school_wellbeing_trend`.
 7. Tests for uniqueness, accepted operations, deterministic latest-version selection, and source-to-raw count reconciliation.
+8. Object-specific north and south secure views with cross-tenant denial checks.
+9. A Power BI Service trend report built from the north secure view.
 
-Defer the dashboard until this vertical slice passes from an empty database. The data contract and correctness behavior are the foundation every later layer consumes.
+That sequencing kept product work behind a passing empty-database build. The
+next implementation slice is Milestone 2's mutation batches, incremental
+models, and full-refresh equivalence tests.

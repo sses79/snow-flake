@@ -90,17 +90,9 @@ GRANT USAGE ON SCHEMA SCHOOL_WELLBEING_DEMO.MARTS
 GRANT USAGE ON SCHEMA SCHOOL_WELLBEING_DEMO.MARTS
   TO ROLE WELLBEING_DEMO_TRUST_SOUTH_READER;
 
--- ALL handles views that exist when this script is rerun. FUTURE handles
--- secure semantic views created later by dbt or the demo administrator.
-GRANT SELECT ON ALL VIEWS IN SCHEMA SCHOOL_WELLBEING_DEMO.MARTS
-  TO ROLE WELLBEING_DEMO_TRUST_NORTH_READER;
-GRANT SELECT ON ALL VIEWS IN SCHEMA SCHOOL_WELLBEING_DEMO.MARTS
-  TO ROLE WELLBEING_DEMO_TRUST_SOUTH_READER;
-
-GRANT SELECT ON FUTURE VIEWS IN SCHEMA SCHOOL_WELLBEING_DEMO.MARTS
-  TO ROLE WELLBEING_DEMO_TRUST_NORTH_READER;
-GRANT SELECT ON FUTURE VIEWS IN SCHEMA SCHOOL_WELLBEING_DEMO.MARTS
-  TO ROLE WELLBEING_DEMO_TRUST_SOUTH_READER;
+-- Reader SELECT grants are deliberately object-specific. Granting ALL or
+-- FUTURE views here would give each tenant role access to the other tenant's
+-- secure view. Run 05_tenant_reader_views.sql after the dbt mart is built.
 
 -- Deliberately absent: SELECT on MARTS tables and any access to RAW, STAGING,
 -- CORE, GOVERNANCE, the load warehouse, or the transform warehouse.

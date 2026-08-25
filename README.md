@@ -16,7 +16,9 @@ only aggregated, non-diagnostic wellbeing indicators.
 - [Milestone 0: account connection and guardrails](docs/milestone-0-account-setup.md)
 - [Milestone 0: 80/20 learning guide](docs/milestone-0-learning-guide.md)
 - [Milestone 1: first source-to-mart vertical slice](docs/milestone-1-vertical-slice.md)
+- [Milestone 1: 80/20 learning guide](docs/milestone-1-learning-guide.md)
 - [Dataset profile and handling rules](data/README.md)
+- [Power BI dashboard runbook](docs/power-bi-dashboard.md)
 
 ## Current status
 
