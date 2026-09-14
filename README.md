@@ -17,6 +17,7 @@ only aggregated, non-diagnostic wellbeing indicators.
 - [Milestone 0: 80/20 learning guide](docs/milestone-0-learning-guide.md)
 - [Milestone 1: first source-to-mart vertical slice](docs/milestone-1-vertical-slice.md)
 - [Milestone 1: 80/20 learning guide](docs/milestone-1-learning-guide.md)
+- [Milestone 2: incremental correctness](docs/milestone-2-incremental-correctness.md)
 - [Dataset profile and handling rules](data/README.md)
 - [Power BI dashboard runbook](docs/power-bi-dashboard.md)
 
@@ -30,6 +31,11 @@ grants, and cost monitor are defined as rerunnable SQL in
 Milestone 1 is implemented: the checked source is deterministically adapted to
 a manifest-backed NDJSON micro-batch, loaded through the internal stage, and
 transformed by tested dbt models into a school wellbeing trend mart.
+
+Milestone 2 is implemented: deterministic mutation and replay batches exercise
+inserts, corrections, duplicate delivery, late older versions, and withdrawals.
+Incremental latest-state and response-fact models are tested against a
+full-refresh rebuild; Milestone 3 is next.
 
 ## Source data
 
