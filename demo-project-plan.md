@@ -35,8 +35,9 @@ The source is a public survey dataset, augmented only with clearly labelled fict
 |---|---|---|
 | Milestone 0 — account connection and guardrails | Complete | Rerunnable Snowflake bootstrap, least-privilege roles, workload warehouses, and cost monitor |
 | Milestone 1 — first source-to-mart vertical slice | Complete | Deterministic 21,954-event batch, tested dbt mart, tenant-safe secure views, and a published Power BI trend report |
-| Milestone 2 — incremental correctness | Next | Mutation batches, incremental models, and full-refresh equivalence remain to be implemented |
-| Milestones 3–5 | Planned | Product surface, governance evidence, and AWS ingestion extension remain deliberately deferred |
+| Milestone 2 — incremental correctness | Complete | Deterministic mutations, duplicate delivery history, incremental state/fact models, 40 passing dbt nodes, and full-refresh equivalence |
+| Milestone 3 — product surface | Next | The code-owned Next.js API and dashboard remain to be implemented |
+| Milestones 4–5 | Planned | Governance evidence and the AWS ingestion extension remain deliberately deferred |
 
 The Power BI report is an early validation of the Milestone 1 mart and secure
 reader boundary. It does not replace Milestone 3's Next.js dashboard or
@@ -355,7 +356,7 @@ Implementation notes:
 
 ### Milestone 2 — incremental correctness
 
-Status: **next**.
+Status: **complete (2026-08-25)**.
 
 Build four small mutation batches:
 
@@ -366,6 +367,18 @@ Build four small mutation batches:
 
 Add dbt incremental models and reconciliation tests.
 
+Implementation:
+
+- `make generate` produces four deterministic mutation batches plus a renamed
+  delivery replay fixture.
+- staging preserves physical raw history while deduplicating logical events by
+  `event_id`;
+- `int_wellbeing_submission_latest` incrementally compares event candidates and
+  ranks source version before arrival time;
+- `fct_wellbeing_response` incrementally merges changed answer rows and removes
+  withdrawn current facts; and
+- the small aggregate mart remains a deterministic rebuild.
+
 Gate:
 
 - Loading the same file twice does not duplicate raw file ingestion under normal `COPY` behavior.
@@ -373,6 +386,20 @@ Gate:
 - The late older submission never overwrites the newer correction.
 - The withdrawn submission is absent from current facts and present in raw history.
 - Full-refresh and incremental builds produce equivalent current-state results.
+
+Evidence:
+
+- raw: 21,961 physical delivery rows;
+- staging: 21,959 distinct logical events;
+- latest state: 21,956 documents, including one winning tombstone;
+- current state: 21,955 upsert documents;
+- response fact: 395,190 rows;
+- trend mart: 2,376 rows;
+- dbt: 40 of 40 nodes passed; and
+- bidirectional fact and mart comparisons returned zero differences after
+  `dbt build --full-refresh`.
+
+Runbook: [`docs/milestone-2-incremental-correctness.md`](docs/milestone-2-incremental-correctness.md).
 
 ### Milestone 3 — product surface
 
@@ -472,6 +499,6 @@ The first source-to-mart slice was delivered in this order:
 8. Object-specific north and south secure views with cross-tenant denial checks.
 9. A Power BI Service trend report built from the north secure view.
 
-That sequencing kept product work behind a passing empty-database build. The
-next implementation slice is Milestone 2's mutation batches, incremental
-models, and full-refresh equivalence tests.
+That sequencing kept product work behind a passing empty-database build.
+Milestone 2 subsequently proved mutation and rebuild correctness. The next
+implementation slice is Milestone 3's code-owned API and dashboard.

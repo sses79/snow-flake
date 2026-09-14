@@ -1,5 +1,9 @@
 # Milestone 1 Learning Guide
 
+This guide records the baseline vertical slice. Mutation and incremental
+behavior added later is documented in
+[`milestone-2-incremental-correctness.md`](milestone-2-incremental-correctness.md).
+
 Milestone 1 proves one complete path from a checked local survey file to a
 report-ready Snowflake mart. Its value is not the size of the pipeline; it is
 the set of explicit contracts that make every boundary inspectable: source,

@@ -11,28 +11,36 @@ set +a
 
 : "${SNOWFLAKE_CONNECTION_NAME:?Set SNOWFLAKE_CONNECTION_NAME in .env}"
 
-manifest_path="generated-data/milestone-1/batch_m1_c17d965e5b1c.manifest.json"
+manifest_path="${1:-generated-data/milestone-1/batch_m1_c17d965e5b1c.manifest.json}"
 if [[ ! -f "$manifest_path" ]]; then
-  echo "Missing generated batch manifest; run make generate first." >&2
+  echo "Missing generated batch manifest at ${manifest_path}; run make generate first." >&2
   exit 1
 fi
 
-data_file=$(node -e 'const m=require("./'"$manifest_path"'"); process.stdout.write(m.data_file)')
-batch_id=$(node -e 'const m=require("./'"$manifest_path"'"); process.stdout.write(m.batch_id)')
-manifest_count=$(node -e 'const m=require("./'"$manifest_path"'"); process.stdout.write(String(m.row_count))')
-data_path="$(pwd)/generated-data/milestone-1/${data_file}"
+manifest_absolute_path="$(cd "$(dirname "$manifest_path")" && pwd)/$(basename "$manifest_path")"
+data_file=$(node -e 'const m=require(process.argv[1]); process.stdout.write(m.data_file)' "$manifest_absolute_path")
+batch_id=$(node -e 'const m=require(process.argv[1]); process.stdout.write(m.batch_id)' "$manifest_absolute_path")
+manifest_count=$(node -e 'const m=require(process.argv[1]); process.stdout.write(String(m.row_count))' "$manifest_absolute_path")
+data_path="$(dirname "$manifest_absolute_path")/${data_file}"
 
-if [[ ! "$manifest_count" =~ ^[0-9]+$ ]] || [[ ! "$batch_id" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+if [[ ! "$manifest_count" =~ ^[0-9]+$ ]] ||
+   [[ ! "$batch_id" =~ ^[a-zA-Z0-9_-]+$ ]] ||
+   [[ ! "$data_file" =~ ^[a-zA-Z0-9_.-]+$ ]]; then
   echo "Generated manifest contains invalid values." >&2
   exit 1
 fi
-
-snow sql -c "$SNOWFLAKE_CONNECTION_NAME" -q \
-  "USE ROLE WELLBEING_DEMO_LOADER; USE WAREHOUSE WELLBEING_DEMO_LOAD_WH; PUT 'file://${data_path}' @SCHOOL_WELLBEING_DEMO.RAW.WELLBEING_INTERNAL_STAGE AUTO_COMPRESS=FALSE OVERWRITE=FALSE;"
+if [[ ! -f "$data_path" ]]; then
+  echo "Missing generated data file at ${data_path}." >&2
+  exit 1
+fi
 
 snow sql -c "$SNOWFLAKE_CONNECTION_NAME" -q \
   "USE ROLE WELLBEING_DEMO_LOADER;
    USE WAREHOUSE WELLBEING_DEMO_LOAD_WH;
+   PUT 'file://${data_path}'
+     @SCHOOL_WELLBEING_DEMO.RAW.WELLBEING_INTERNAL_STAGE
+     AUTO_COMPRESS=FALSE
+     OVERWRITE=FALSE;
    COPY INTO SCHOOL_WELLBEING_DEMO.RAW.MONGO_WELLBEING_SUBMISSIONS
      (ENVELOPE, SOURCE_FILE, SOURCE_FILE_ROW_NUMBER, LOADED_AT, LOAD_RUN_ID)
    FROM (
@@ -40,11 +48,7 @@ snow sql -c "$SNOWFLAKE_CONNECTION_NAME" -q \
      FROM @SCHOOL_WELLBEING_DEMO.RAW.WELLBEING_INTERNAL_STAGE/${data_file}
    )
    FILE_FORMAT = (FORMAT_NAME = SCHOOL_WELLBEING_DEMO.RAW.WELLBEING_NDJSON_FORMAT)
-   ON_ERROR = ABORT_STATEMENT;"
-
-snow sql -c "$SNOWFLAKE_CONNECTION_NAME" -q \
-  "USE ROLE WELLBEING_DEMO_LOADER;
-   USE WAREHOUSE WELLBEING_DEMO_LOAD_WH;
+   ON_ERROR = ABORT_STATEMENT;
    EXECUTE IMMEDIATE \$\$
    DECLARE actual_count NUMBER;
            reconciliation_failed EXCEPTION (-20001, 'Manifest/raw reconciliation failed');

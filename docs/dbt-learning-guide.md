@@ -117,9 +117,12 @@ easy to inspect; tables persist the larger fact and reporting result. The
 custom schemas directly in `STAGING`, `CORE`, and `MARTS` rather than prefixing
 them with the profile's default schema.
 
-A full build recreates the table models even when their SQL is unchanged; none
-of these models is incremental yet. That is simple and correct for this demo,
-but it consumes transform-warehouse compute.
+Milestone 2 makes latest submission state and the response fact incremental.
+The latest model compares logical event candidates with the stored winner, and
+the fact merges only new or changed answer rows before removing keys withdrawn
+from current state.
+The small trend mart remains a full table rebuild because correctness after
+deletes and dimension moves is more valuable than optimizing 2,376 rows.
 
 Transferable lesson: start with views for simplicity, use tables at stable or
 expensive boundaries, and introduce incremental logic only with a tested need.
@@ -132,20 +135,24 @@ YAML tests in [`staging.yml`](../dbt/models/staging/staging.yml),
 `not_null`, `unique`, and `accepted_values`. Singular tests under
 [`dbt/tests/`](../dbt/tests/) express project invariants as SQL:
 
-- raw has exactly 21,954 Milestone 1 rows;
-- fact has `21,954 * 18` rows;
+- expected physical batch counts reconcile to raw history;
+- duplicate delivery rows remain in raw but collapse by logical `event_id`;
+- latest state matches a complete ranking of event history;
+- fact content reconciles to current normalized answers;
 - `(document_id, question_code)` is unique;
+- withdrawals are absent from the current fact;
 - answered plus missing reconciles to eligible, and adverse never exceeds
   answered.
 
 `dbt build` runs tests in DAG order. A failed upstream test prevents dependent
 nodes from building, which is stronger than running every model first and
-checking quality afterward. The successful build produced 6 models and 27
-tests; generated `dbt/target/run_results.json` records each node's status,
+checking quality afterward. The Milestone 2 acceptance build produced 6 models
+and 33 tests; generated `dbt/target/run_results.json` records each node's status,
 timing, compiled SQL, relation, and Snowflake query ID.
 
-The exact-count tests prove this fixture, not a general production volume.
-They must evolve when Milestone 2 introduces additional change events.
+The expected batch counts prove this deterministic fixture, while grain,
+winner-selection, current-state reconciliation, and withdrawal tests express
+the reusable correctness contracts.
 
 Transferable lesson: test stable contracts—keys, accepted domains, grain, and
 reconciliation—and distinguish fixture assertions from permanent invariants.

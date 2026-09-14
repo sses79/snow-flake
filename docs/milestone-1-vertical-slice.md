@@ -1,5 +1,9 @@
 # Milestone 1: first source-to-mart vertical slice
 
+This runbook records the baseline build. For corrections, duplicate delivery,
+late versions, withdrawals, and incremental/full-refresh equivalence, continue
+with [`milestone-2-incremental-correctness.md`](milestone-2-incremental-correctness.md).
+
 ## Prerequisites
 
 - Complete Milestone 0 and configure the named Snowflake CLI connection.

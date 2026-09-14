@@ -18,9 +18,16 @@ models:
         data_tests: [not_null]
       - name: source_updated_at
         data_tests: [not_null]
-      - name: trust_id
-        data_tests: [not_null]
-      - name: school_id
-        data_tests: [not_null]
-      - name: survey_period
-        data_tests: [not_null]
+
+  - name: int_wellbeing_submission_latest
+    description: Incremental current winner per document, including withdrawal tombstones.
+    columns:
+      - name: document_id
+        data_tests: [not_null, unique]
+      - name: event_id
+        data_tests: [not_null, unique]
+      - name: operation
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [upsert, delete]
