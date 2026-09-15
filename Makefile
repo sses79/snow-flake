@@ -3,13 +3,13 @@ DBT ?= .venv/bin/dbt
 
 .NOTPARALLEL: demo-build
 
-.PHONY: generate test demo-reset demo-load demo-load-m1 demo-load-m2 demo-build dbt-build verify-milestone-2 dashboard-dev dashboard-test dashboard-build
+.PHONY: generate test demo-reset demo-load demo-load-m1 demo-load-m2 demo-build dbt-build verify-milestone-2 verify-milestone-4 dashboard-dev dashboard-test dashboard-build
 
 generate:
 	node apps/generator/src/cli.ts
 
 test:
-	node --test apps/generator/test/*.test.ts
+	npm test
 
 demo-reset:
 	./scripts/reset-demo.sh
@@ -23,8 +23,7 @@ demo-load-m2: generate
 demo-load: demo-load-m1 demo-load-m2
 
 dbt-build:
-	@test -f .env || (echo "Missing .env; copy .env.example and configure Snowflake." >&2; exit 1)
-	set -a; source .env; set +a; $(DBT) build --project-dir dbt --profiles-dir dbt
+	DBT=$(DBT) ./scripts/dbt-build.sh
 
 demo-build: test demo-load dbt-build
 
@@ -40,3 +39,5 @@ dashboard-test:
 
 dashboard-build:
 	pnpm --dir apps/dashboard build
+
+verify-milestone-4: test dashboard-build dbt-build

@@ -36,12 +36,13 @@ The source is a public survey dataset, augmented only with clearly labelled fict
 | Milestone 0 — account connection and guardrails | Complete | Rerunnable Snowflake bootstrap, least-privilege roles, workload warehouses, and cost monitor |
 | Milestone 1 — first source-to-mart vertical slice | Complete | Deterministic 21,954-event batch, tested dbt mart, tenant-safe secure views, and a published Power BI trend report |
 | Milestone 2 — incremental correctness | Complete | Deterministic mutations, duplicate delivery history, incremental state/fact models, 40 passing dbt nodes, and full-refresh equivalence |
-| Milestone 3 — product surface | Implemented; account deployment pending | Next.js API/UI, aggregate marts, tenant secure views, and browser-boundary tests are versioned; deploy after renewing runtime credentials |
-| Milestones 4–5 | Planned | Governance evidence and the AWS ingestion extension remain deliberately deferred |
+| Milestone 3 — product surface | Complete | Next.js API/UI, aggregate marts, tenant secure views, browser-boundary tests, and live PAT authentication through the north reader role |
+| Milestone 4 — analytical depth | Complete | Trust benchmarks, change drivers, interpretable metrics, analyst exports, and minimum-cohort suppression are implemented and live-verified |
+| Milestones 5–6 | Planned | Production hardening and the AWS ingestion extension remain deliberately deferred |
 
 The Power BI report is an early validation of the Milestone 1 mart and secure
 reader boundary. It does not replace Milestone 3's Next.js dashboard or
-Milestone 4's row-access policy, cohort suppression, and health evidence.
+Milestone 4's deeper analyst workflow and minimum-cohort controls.
 
 Use two interchangeable ingestion modes:
 
@@ -259,14 +260,20 @@ Implementation:
 - Loader can write only to `RAW` and use the load warehouse/stage.
 - Transformer can read `RAW` and build downstream schemas.
 - Reader roles can select only their object-specific secure view in `MARTS`.
-- Milestone 4 will add a row-access policy that maps `CURRENT_ROLE()` to
-  `trust_id`; the current secure views already enforce the two-tenant demo
-  boundary without exposing the shared mart table.
-- A source row identifier is transformed into a stable pseudonym before `CORE`; direct identifiers, if discovered during profiling, do not enter marts.
+- Milestone 5 can add a row-access policy that maps `CURRENT_ROLE()` to
+  `trust_id` if the product adopts shared multi-tenant semantic views. The
+  current secure views already enforce the two-tenant demo boundary without
+  exposing the shared mart table.
+- The source row identifier contributes to a deterministic submission ID for
+  pipeline correctness but is never exposed by semantic views. Direct
+  identifiers, if discovered during profiling, do not enter marts.
 - Free text is generated only to prove it is excluded from curated layers.
 - Benchmark rows with `respondent_count < 10` return no sensitive metric.
 
-For a learning demo, store a non-production HMAC secret in the local environment and never commit it. In a production design, use a managed secret/key boundary and define who can re-identify subjects.
+If a future use case requires stable respondent linkage, introduce an HMAC
+pseudonym and keep its secret outside the repository. A production design must
+use a managed secret/key boundary and explicitly define who can re-identify
+subjects.
 
 ## 8. Repository shape
 
@@ -418,25 +425,103 @@ Gate:
 - The app queries secure views only.
 - A user can identify a school with a worsening wellbeing indicator and inspect aggregated support signals in under one minute.
 
-### Milestone 4 — privacy, reliability, and cost evidence
+### Milestone 4 — analytical depth and trustworthy insights
 
 Build:
 
-- HMAC respondent pseudonyms where the source row grain supports stable respondents.
-- Tenant row-access policy and two reader roles.
-- Minimum-cohort suppression.
-- dbt source freshness, uniqueness, not-null, relationship, and accepted-value tests.
-- Health mart and queries using load/query history for failures and warehouse consumption.
+- An indicator catalogue containing the readable label, wellbeing category,
+  answer display order, adverse-response rule, direction, and interpretation
+  note for every curated question.
+- A school-period analytical mart containing the current adverse-response
+  rate, previous-period rate, percentage-point change, trust benchmark,
+  school-versus-trust gap, answered count, and missing-response rate.
+- Category summaries for emotional wellbeing, peer relationships, safety,
+  school support, and physical wellbeing. Do not combine unlike questions
+  into a clinical-sounding overall wellbeing score.
+- A top-driver view that explains which questions contributed most to each
+  school's latest category movement.
+- Ordered response distributions with counts and percentages that reconcile
+  to the analytical mart.
+- Minimum-cohort suppression: groups below 10 expose neither the numerator nor
+  a derived rate. Display a clear coverage warning when missingness or a
+  suppressed cohort limits interpretation.
+- Dashboard navigation from trust overview, to school and category, to the
+  selected question's response distribution. Show change in percentage
+  points, not ambiguous relative percentages.
+- Plain-language insight cards for largest worsening, largest improvement,
+  persistent high signals, and material gaps from the trust benchmark.
+- A filtered aggregate CSV export that applies the same tenant, cohort, and
+  suppression rules as the visible dashboard.
+- Versioned analyst SQL under `analysis/` for the principal investigation
+  questions, plus a metric dictionary explaining calculations and caveats.
+- dbt reconciliation, uniqueness, not-null, relationship, accepted-value, and
+  suppression tests for the new semantic layer.
+
+Analytical questions:
+
+1. Which fictional schools worsened most since the previous survey period?
+2. Is the school also worse than its trust benchmark, and by how many
+   percentage points?
+3. Which categories and individual questions drive the movement?
+4. How many answered and missing responses support the finding?
+5. Does the response distribution support the headline aggregate?
+6. Are suppression or coverage limitations material to interpretation?
+
+Authentication decision:
+
+- Continue using the existing `SSES79` PAT for this personal demo.
+- Keep the PAT in an ignored external file and load it only in the Next.js
+  server runtime; it must never use a `NEXT_PUBLIC_` variable or reach the
+  browser.
+- Continue forcing `WELLBEING_DEMO_TRUST_NORTH_READER` in the server-side
+  tenant mapping so application queries retain least-privilege view access.
+- A dedicated service identity remains the production recommendation, but is
+  not a Milestone 4 gate.
 
 Gate:
 
-- The north role returns zero south rows, and vice versa.
-- No direct respondent ID or sensitive free text exists in marts.
-- Cohorts below 10 expose neither rate nor numerator.
-- The dashboard displays last successful data time.
-- The runbook explains failed loads, replay, schema changes, and cost inspection.
+- An analyst can identify the largest worsening school, compare it with the
+  trust benchmark, and inspect its principal question drivers in under three
+  minutes.
+- Percentage-point changes and trust benchmarks reconcile exactly to their
+  underlying aggregate counts in dbt tests.
+- Every response distribution reconciles to its answered-response count and
+  uses the catalogue's documented display order.
+- Cohorts below 10 expose neither rate nor numerator through secure views, API
+  responses, CSV exports, or dashboard tooltips.
+- The browser continues to receive aggregate rows only and the north reader
+  role continues to return zero south rows.
+- No direct respondent identifier, sensitive free text, Snowflake credential,
+  or arbitrary SQL reaches the analytical surface.
+- Every headline insight links to the supporting school, category, question,
+  period, response volume, and metric definition.
 
-### Milestone 5 — S3 and Snowpipe upgrade
+### Milestone 5 — production hardening and operational evidence
+
+Build:
+
+- HMAC respondent pseudonyms if a future source contract requires stable
+  respondent linkage below the aggregate layer.
+- A tenant row-access policy if the product replaces tenant-specific secure
+  views with shared multi-tenant semantic views.
+- A dedicated dashboard service identity and managed secret rotation for a
+  hosted deployment.
+- dbt source freshness and a health mart using load/query history for failures,
+  warehouse consumption, and approximate cost.
+- A runbook for failed loads, replay, schema changes, credential rotation, and
+  cost inspection.
+
+Gate:
+
+- Production credentials are isolated by workload and can be rotated without
+  changing application code.
+- Tenant isolation remains effective through both positive and negative role
+  tests.
+- The health surface identifies the last successful load, failed files, and
+  approximate warehouse consumption.
+- Full recovery and credential-rotation exercises are documented and repeatable.
+
+### Milestone 6 — S3 and Snowpipe upgrade
 
 Prerequisite: an AWS account or sandbox with permission to create an S3 bucket, SQS notification, and IAM role/policy.
 
@@ -481,7 +566,10 @@ Gate:
 
 ## 12. Definition of done
 
-The core demo is complete at Milestone 4. Milestone 5 is an infrastructure extension, not a blocker for demonstrating Snowflake, dbt, data correctness, governance, and product thinking.
+The core demo is complete at Milestone 4. Milestone 5 adds production
+hardening, and Milestone 6 is the AWS infrastructure extension; neither is a
+blocker for demonstrating Snowflake, dbt, data correctness, meaningful
+analysis, governance, and product thinking.
 
 The repository is done when a new developer can follow the README, connect their own Snowflake account, run a reset/build command, reproduce all mutation scenarios, pass the tests, and deliver the five-minute demo without undocumented manual fixes.
 
@@ -500,5 +588,6 @@ The first source-to-mart slice was delivered in this order:
 9. A Power BI Service trend report built from the north secure view.
 
 That sequencing kept product work behind a passing empty-database build.
-Milestone 2 subsequently proved mutation and rebuild correctness. The next
-implementation slice is Milestone 3's code-owned API and dashboard.
+Milestone 2 subsequently proved mutation and rebuild correctness, and
+Milestone 3 delivered the code-owned API and dashboard. The next implementation
+slice is Milestone 4's analytical semantic layer and drill-down workflow.

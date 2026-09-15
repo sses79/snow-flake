@@ -49,16 +49,18 @@ The views exposed to the North dashboard are:
 - `MART_TRUST_NORTH_SUPPORT_SIGNAL_SUMMARY`; and
 - `MART_TRUST_NORTH_DATA_FRESHNESS`.
 
+Milestone 4 adds the suppression-aware indicator, category, and change-driver
+views documented in [`milestone-4-analytics.md`](milestone-4-analytics.md).
+
 South has the same four contracts under `MART_TRUST_SOUTH_*`. Reader roles do
 not receive `SELECT` on the shared marts.
 
 ## Runtime identity
 
-Use a dedicated Snowflake service user whose only project role is
-`WELLBEING_DEMO_TRUST_NORTH_READER`. Set its default warehouse to
-`WELLBEING_DEMO_APP_WH`. Key-pair authentication is preferred for hosting; a
-scoped PAT is convenient for local development. Do not reuse the loader or
-transformer identity.
+The personal demo intentionally reuses the existing `SSES79` PAT while the
+server forces `WELLBEING_DEMO_TRUST_NORTH_READER` for application queries. A
+hosted production deployment should instead use a dedicated service identity
+whose only project role is the matching tenant reader role.
 
 Copy the Milestone 3 entries from `.env.example` to the ignored `.env`. The
 dashboard accepts either:
@@ -79,8 +81,9 @@ make dashboard-dev
 ```
 
 Open `http://localhost:3000`. In browser developer tools, the Network tab
-should show `/api/dashboard` returning only filters, trend aggregates, answer
-distribution, support-signal aggregates, and freshness. It must not contain a
+should show `/api/dashboard` returning only filters, benchmarked trend and
+category aggregates, change drivers, answer distribution, and freshness. It
+must not contain a
 Snowflake token, username, private key, `document_id`, respondent identifier,
 or raw answer envelope.
 
@@ -92,8 +95,7 @@ current milestone is intended for local/private demonstration.
 
 ## Product interpretation
 
-“Worsening” means the aggregate adverse-response rate increased from the
-previous survey period for the selected question. `lower`, `watch`, and
-`elevated` are deterministic product bands at below 10%, 10–20%, and at least
-20%. They are deliberately labelled non-diagnostic and are not a pupil-level
-assessment. Minimum-cohort suppression remains a Milestone 4 control.
+“Worsening” means the aggregate adverse-response rate increased by at least one
+percentage point from the previous survey period. It is descriptive, not a
+statistical-significance test. Milestone 4 suppresses protected metrics for
+cohorts below 10.

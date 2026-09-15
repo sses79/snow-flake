@@ -5,7 +5,7 @@ import { getTenantConfig } from "../lib/tenant.ts";
 
 test("every dashboard query reads only the selected tenant's secure views", () => {
   const tenant = getTenantConfig("trust_north");
-  const queries = dashboardQueries(tenant, "happy", "school_001", "2019_summer");
+  const queries = dashboardQueries(tenant, "happy", "emotional_wellbeing", "school_001", "2019_summer");
   const allowedViews = new Set(Object.values(tenant.views));
   for (const [name, query] of Object.entries(queries)) {
     const objects = referencedObjects(query.sqlText);
@@ -19,9 +19,11 @@ test("every dashboard query reads only the selected tenant's secure views", () =
 
 test("browser filters remain bind values and never become identifiers", () => {
   const tenant = getTenantConfig("trust_south");
-  const queries = dashboardQueries(tenant, "happy", "school_004", "2019_summer");
+  const queries = dashboardQueries(tenant, "happy", "emotional_wellbeing", "school_004", "2019_summer");
   assert.deepEqual(queries.trend.binds, ["happy", "school_004"]);
   assert.deepEqual(queries.distribution.binds, ["happy", "2019_summer", "school_004"]);
+  assert.deepEqual(queries.categories.binds, ["emotional_wellbeing", "school_004"]);
+  assert.deepEqual(queries.changeDrivers.binds, ["emotional_wellbeing", "2019_summer", "school_004"]);
   assert.doesNotMatch(queries.trend.sqlText, /school_004|happy/);
 });
 
