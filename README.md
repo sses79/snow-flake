@@ -18,6 +18,8 @@ only aggregated, non-diagnostic wellbeing indicators.
 - [Milestone 1: first source-to-mart vertical slice](docs/milestone-1-vertical-slice.md)
 - [Milestone 1: 80/20 learning guide](docs/milestone-1-learning-guide.md)
 - [Milestone 2: incremental correctness](docs/milestone-2-incremental-correctness.md)
+- [Milestone 3: aggregate dashboard](docs/milestone-3-dashboard.md)
+- [Milestone 4: analytical depth](docs/milestone-4-analytics.md)
 - [Dataset profile and handling rules](data/README.md)
 - [Power BI dashboard runbook](docs/power-bi-dashboard.md)
 
@@ -37,11 +39,15 @@ inserts, corrections, duplicate delivery, late older versions, and withdrawals.
 Incremental latest-state and response-fact models are tested against a
 full-refresh rebuild.
 
-Milestone 3 is implemented in code: aggregate distribution, support-signal,
+Milestone 3 is complete: aggregate distribution, support-signal,
 and freshness marts feed tenant-specific secure views, and the Next.js
 dashboard queries those views from a server-only Snowflake adapter. See the
-[dashboard runbook](docs/milestone-3-dashboard.md). The account deployment
-must be completed with valid Snowflake runtime credentials.
+[dashboard runbook](docs/milestone-3-dashboard.md).
+
+Milestone 4 is implemented: catalogue-driven definitions, suppression-aware
+school and category analysis, weighted trust benchmarks, question change
+drivers, ordered distributions, analyst queries, and filtered aggregate CSV
+export extend the dashboard into a traceable analytical workflow.
 
 ## Source data
 

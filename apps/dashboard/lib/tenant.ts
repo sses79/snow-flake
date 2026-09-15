@@ -9,6 +9,9 @@ export type TenantConfig = {
     distribution: string;
     supportSignals: string;
     freshness: string;
+    indicatorAnalysis: string;
+    categoryAnalysis: string;
+    changeDrivers: string;
   };
 };
 
@@ -23,7 +26,10 @@ const TENANTS: Record<DashboardTenant, TenantConfig> = {
       trend: `${DATABASE}.MART_TRUST_NORTH_SCHOOL_WELLBEING_TREND`,
       distribution: `${DATABASE}.MART_TRUST_NORTH_QUESTION_RESPONSE_DISTRIBUTION`,
       supportSignals: `${DATABASE}.MART_TRUST_NORTH_SUPPORT_SIGNAL_SUMMARY`,
-      freshness: `${DATABASE}.MART_TRUST_NORTH_DATA_FRESHNESS`
+      freshness: `${DATABASE}.MART_TRUST_NORTH_DATA_FRESHNESS`,
+      indicatorAnalysis: `${DATABASE}.MART_TRUST_NORTH_SCHOOL_INDICATOR_ANALYSIS`,
+      categoryAnalysis: `${DATABASE}.MART_TRUST_NORTH_SCHOOL_CATEGORY_ANALYSIS`,
+      changeDrivers: `${DATABASE}.MART_TRUST_NORTH_SCHOOL_CHANGE_DRIVERS`
     }
   },
   trust_south: {
@@ -34,7 +40,10 @@ const TENANTS: Record<DashboardTenant, TenantConfig> = {
       trend: `${DATABASE}.MART_TRUST_SOUTH_SCHOOL_WELLBEING_TREND`,
       distribution: `${DATABASE}.MART_TRUST_SOUTH_QUESTION_RESPONSE_DISTRIBUTION`,
       supportSignals: `${DATABASE}.MART_TRUST_SOUTH_SUPPORT_SIGNAL_SUMMARY`,
-      freshness: `${DATABASE}.MART_TRUST_SOUTH_DATA_FRESHNESS`
+      freshness: `${DATABASE}.MART_TRUST_SOUTH_DATA_FRESHNESS`,
+      indicatorAnalysis: `${DATABASE}.MART_TRUST_SOUTH_SCHOOL_INDICATOR_ANALYSIS`,
+      categoryAnalysis: `${DATABASE}.MART_TRUST_SOUTH_SCHOOL_CATEGORY_ANALYSIS`,
+      changeDrivers: `${DATABASE}.MART_TRUST_SOUTH_SCHOOL_CHANGE_DRIVERS`
     }
   }
 };

@@ -1,0 +1,19 @@
+question_code,indicator_label,category_code,category_label,scale_code,direction,interpretation_note
+sad_or_upset,Sad or upset,emotional_wellbeing,Emotional wellbeing,frequency_negative,higher_is_worse,Frequent reports of feeling sad or upset may indicate a useful area for supportive conversation.
+lonely,Lonely,emotional_wellbeing,Emotional wellbeing,frequency_negative,higher_is_worse,Frequent reports of loneliness describe a survey pattern and are not an individual diagnosis.
+confident,Low confidence,emotional_wellbeing,Emotional wellbeing,frequency_positive,higher_is_worse,Rare or absent confidence is treated as the adverse response for this product rule.
+stressed_or_anxious,Stressed or anxious,emotional_wellbeing,Emotional wellbeing,frequency_negative,higher_is_worse,Frequent reports of stress or anxiety describe an aggregate survey pattern.
+happy,Low happiness,emotional_wellbeing,Emotional wellbeing,frequency_positive,higher_is_worse,Rare or absent happiness is treated as the adverse response for this product rule.
+bad_tempered_or_angry,Bad-tempered or angry,emotional_wellbeing,Emotional wellbeing,frequency_negative,higher_is_worse,Frequent reports of anger describe an aggregate survey pattern.
+happiness_with_number_of_good_friends,Unhappy with number of good friends,peer_relationships,Peer relationships,happiness_positive,higher_is_worse,Unhappy responses identify an aggregate peer-relationship conversation area.
+bullying_frequency,Bullying frequency,peer_relationships,Peer relationships,bullying_frequency,higher_is_worse,Weekly or more frequent reported bullying is treated as adverse.
+school_belonging,Low school belonging,school_support,School support,agreement_positive,higher_is_worse,Disagreement with school belonging is treated as adverse.
+school_helps_when_worried,School does not help when worried,school_support,School support,agreement_positive,higher_is_worse,Disagreement that school helps when worried is treated as adverse.
+enjoys_school,Does not enjoy school,school_support,School support,agreement_positive,higher_is_worse,Disagreement with enjoying school is treated as adverse.
+school_is_welcoming_and_caring,School not welcoming and caring,school_support,School support,agreement_positive,higher_is_worse,Disagreement that school is welcoming and caring is treated as adverse.
+relationship_with_school_staff,Poor relationship with school staff,school_support,School support,agreement_positive,higher_is_worse,Disagreement with a positive staff relationship is treated as adverse.
+safety_school_toilets,Unsafe in school toilets,safety,Safety,safety_positive,higher_is_worse,Unsafe responses identify an aggregate location-specific safety concern.
+safety_travelling_to_from_school,Unsafe travelling to or from school,safety,Safety,safety_positive,higher_is_worse,Unsafe responses identify an aggregate travel safety concern.
+safety_during_lessons,Unsafe during lessons,safety,Safety,safety_positive,higher_is_worse,Unsafe responses identify an aggregate lesson-time safety concern.
+safety_outside_lessons,Unsafe outside lessons,safety,Safety,safety_positive,higher_is_worse,Unsafe responses identify an aggregate non-lesson safety concern.
+healthy_lifestyle_encouragement,Low healthy-lifestyle encouragement,physical_wellbeing,Physical wellbeing,quality_positive,higher_is_worse,Poor ratings of healthy-lifestyle encouragement identify an aggregate support area.

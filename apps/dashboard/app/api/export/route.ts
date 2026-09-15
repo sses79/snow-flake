@@ -1,5 +1,6 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import { z } from "zod";
+import { trendRowsToCsv } from "@/lib/csv";
 import { loadDashboardData } from "@/lib/dashboard-data";
 import { querySnowflake } from "@/lib/snowflake";
 
@@ -16,19 +17,19 @@ const requestSchema = z.object({
 
 export async function GET(request: NextRequest) {
   const parsed = requestSchema.safeParse(Object.fromEntries(request.nextUrl.searchParams));
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid dashboard filters" }, { status: 400 });
-  }
+  if (!parsed.success) return new Response("Invalid export filters\n", { status: 400 });
   try {
     const data = await loadDashboardData(querySnowflake, parsed.data);
-    return NextResponse.json(data, {
-      headers: { "Cache-Control": "private, max-age=30" }
+    return new Response(trendRowsToCsv(data.trend), {
+      headers: {
+        "Cache-Control": "private, no-store",
+        "Content-Disposition": `attachment; filename="wellbeing-${data.selection.questionCode}.csv"`,
+        "Content-Type": "text/csv; charset=utf-8",
+        "X-Content-Type-Options": "nosniff"
+      }
     });
   } catch (error) {
-    console.error("Dashboard request failed", error);
-    const message = error instanceof Error && /^(Unknown|Start period)/.test(error.message)
-      ? error.message
-      : "Dashboard data is temporarily unavailable";
-    return NextResponse.json({ error: message }, { status: message.startsWith("Dashboard") ? 503 : 400 });
+    console.error("Dashboard export failed", error);
+    return new Response("Export is temporarily unavailable\n", { status: 503 });
   }
 }

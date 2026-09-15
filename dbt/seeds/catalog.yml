@@ -1,0 +1,28 @@
+version: 2
+
+seeds:
+  - name: wellbeing_indicator_catalog
+    description: Analyst-owned definitions and interpretation rules for curated wellbeing indicators.
+    columns:
+      - name: question_code
+        data_tests: [not_null, unique]
+      - name: category_code
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [emotional_wellbeing, peer_relationships, safety, school_support, physical_wellbeing]
+      - name: direction
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [higher_is_worse]
+  - name: wellbeing_answer_scale
+    description: Reusable answer ordering and adverse-answer rules for the curated survey scales.
+    columns:
+      - name: scale_code
+        data_tests: [not_null]
+      - name: answer_value
+        data_tests: [not_null]
+      - name: answer_display_order
+        data_tests: [not_null]

@@ -1,0 +1,24 @@
+version: 2
+
+unit_tests:
+  - name: indicator_analysis_suppresses_nine_submission_cohort
+    description: A nine-submission fixture exposes neither adverse numerator nor derived school or trust rates.
+    model: mart_school_indicator_analysis
+    given:
+      - input: ref('fct_wellbeing_response')
+        rows:
+          - {document_id: d01, trust_id: trust_north, school_id: school_999, school_classification: Demo, survey_period: 2026_spring, question_code: happy, is_answered: true, is_adverse_response: true}
+          - {document_id: d02, trust_id: trust_north, school_id: school_999, school_classification: Demo, survey_period: 2026_spring, question_code: happy, is_answered: true, is_adverse_response: true}
+          - {document_id: d03, trust_id: trust_north, school_id: school_999, school_classification: Demo, survey_period: 2026_spring, question_code: happy, is_answered: true, is_adverse_response: false}
+          - {document_id: d04, trust_id: trust_north, school_id: school_999, school_classification: Demo, survey_period: 2026_spring, question_code: happy, is_answered: true, is_adverse_response: false}
+          - {document_id: d05, trust_id: trust_north, school_id: school_999, school_classification: Demo, survey_period: 2026_spring, question_code: happy, is_answered: true, is_adverse_response: false}
+          - {document_id: d06, trust_id: trust_north, school_id: school_999, school_classification: Demo, survey_period: 2026_spring, question_code: happy, is_answered: true, is_adverse_response: false}
+          - {document_id: d07, trust_id: trust_north, school_id: school_999, school_classification: Demo, survey_period: 2026_spring, question_code: happy, is_answered: true, is_adverse_response: false}
+          - {document_id: d08, trust_id: trust_north, school_id: school_999, school_classification: Demo, survey_period: 2026_spring, question_code: happy, is_answered: true, is_adverse_response: false}
+          - {document_id: d09, trust_id: trust_north, school_id: school_999, school_classification: Demo, survey_period: 2026_spring, question_code: happy, is_answered: false, is_adverse_response: false}
+      - input: ref('dim_wellbeing_indicator_answer')
+        rows:
+          - {question_code: happy, indicator_label: Low happiness, category_code: emotional_wellbeing, category_label: Emotional wellbeing, direction: higher_is_worse, interpretation_note: Demo interpretation}
+    expect:
+      rows:
+        - {trust_id: trust_north, school_id: school_999, survey_period: 2026_spring, question_code: happy, eligible_submission_count: 9, answered_response_count: 8, is_suppressed: true, adverse_response_count: null, adverse_response_rate: null, missing_response_rate: null, trust_adverse_response_count: null, trust_adverse_response_rate: null, coverage_status: suppressed, movement_status: no_comparison}

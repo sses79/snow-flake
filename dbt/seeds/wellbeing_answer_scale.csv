@@ -1,0 +1,36 @@
+scale_code,answer_value,answer_display_order,is_adverse_answer
+frequency_negative,Never,1,false
+frequency_negative,Rarely,2,false
+frequency_negative,Some days,3,false
+frequency_negative,Most days,4,true
+frequency_negative,Every day,5,true
+frequency_positive,Never,1,true
+frequency_positive,Rarely,2,true
+frequency_positive,Some days,3,false
+frequency_positive,Most days,4,false
+frequency_positive,Every day,5,false
+happiness_positive,Very unhappy,1,true
+happiness_positive,Unhappy,2,true
+happiness_positive,Ok,3,false
+happiness_positive,Happy,4,false
+happiness_positive,Very happy,5,false
+bullying_frequency,Not at all,1,false
+bullying_frequency,A few times this year,2,false
+bullying_frequency,Every month,3,false
+bullying_frequency,Every week,4,true
+bullying_frequency,Most days,5,true
+bullying_frequency,Every day,6,true
+agreement_positive,Strongly disagree,1,true
+agreement_positive,Disagree,2,true
+agreement_positive,Not sure,3,false
+agreement_positive,Agree,4,false
+agreement_positive,Strongly agree,5,false
+safety_positive,Very unsafe,1,true
+safety_positive,Unsafe,2,true
+safety_positive,Safe,3,false
+safety_positive,Very safe,4,false
+quality_positive,Very poor,1,true
+quality_positive,Poor,2,true
+quality_positive,Ok,3,false
+quality_positive,Good,4,false
+quality_positive,Very good,5,false
