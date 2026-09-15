@@ -7,6 +7,8 @@ tenant's suppression-aware secure views. Run them with
 - `01_worsening_schools.sql`: latest school movement for a selected indicator.
 - `02_trust_benchmark_gaps.sql`: schools furthest above the trust benchmark.
 - `03_category_change_drivers.sql`: question contributions to category change.
+- `04_pipeline_health.sql`: observer-only load, failure, freshness, and
+  warehouse-consumption evidence.
 
 Positive percentage-point change means a higher adverse-response rate. Null
 protected metrics mean that the cohort was suppressed or has no prior period.

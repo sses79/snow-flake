@@ -18,7 +18,7 @@ function required(name: string): string {
 function connectionOptions(): ConnectionOptions {
   const tenant = getTenantConfig();
   const authenticator = (process.env.SNOWFLAKE_DASHBOARD_AUTHENTICATOR ?? "PROGRAMMATIC_ACCESS_TOKEN").toUpperCase();
-  const options: ConnectionOptions = {
+  const options: ConnectionOptions & { queryTag: string } = {
     account: required("SNOWFLAKE_ACCOUNT"),
     username: required("SNOWFLAKE_DASHBOARD_USER"),
     authenticator,
@@ -27,7 +27,8 @@ function connectionOptions(): ConnectionOptions {
     database: process.env.SNOWFLAKE_DATABASE ?? "SCHOOL_WELLBEING_DEMO",
     schema: "MARTS",
     application: "WELLBEING_DEMO_DASHBOARD",
-    clientSessionKeepAlive: false
+    clientSessionKeepAlive: false,
+    queryTag: "wellbeing_demo_dashboard"
   };
 
   if (authenticator === "PROGRAMMATIC_ACCESS_TOKEN") {
@@ -58,7 +59,17 @@ function connect(): Promise<Connection> {
           reject(new Error("The dashboard could not connect to Snowflake", { cause: error }));
           return;
         }
-        resolve(establishedConnection);
+        establishedConnection.execute({
+          sqlText: "USE SECONDARY ROLES NONE",
+          complete(secondaryRoleError) {
+            if (secondaryRoleError) {
+              connectionPromise = null;
+              reject(new Error("The dashboard could not disable secondary roles", { cause: secondaryRoleError }));
+              return;
+            }
+            resolve(establishedConnection);
+          }
+        });
       });
     });
   }
