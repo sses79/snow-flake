@@ -38,7 +38,8 @@ The source is a public survey dataset, augmented only with clearly labelled fict
 | Milestone 2 — incremental correctness | Complete | Deterministic mutations, duplicate delivery history, incremental state/fact models, 40 passing dbt nodes, and full-refresh equivalence |
 | Milestone 3 — product surface | Complete | Next.js API/UI, aggregate marts, tenant secure views, browser-boundary tests, and live PAT authentication through the north reader role |
 | Milestone 4 — analytical depth | Complete | Trust benchmarks, change drivers, interpretable metrics, analyst exports, and minimum-cohort suppression are implemented and live-verified |
-| Milestones 5–6 | Planned | Production hardening and the AWS ingestion extension remain deliberately deferred |
+| Milestone 5 — production hardening | Complete | Workload service identities, source freshness, pipeline audit/health evidence, operational least privilege, and recovery/rotation acceptance checks |
+| Milestone 6 — AWS ingestion | Planned | The S3, SQS, and Snowpipe extension remains deliberately deferred |
 
 The Power BI report is an early validation of the Milestone 1 mart and secure
 reader boundary. It does not replace Milestone 3's Next.js dashboard or
@@ -498,6 +499,14 @@ Gate:
 
 ### Milestone 5 — production hardening and operational evidence
 
+Status: **complete (2026-09-15)**.
+
+The current dataset contains no real stable respondent identifier, so HMAC
+pseudonymisation is documented as a pre-ingestion migration rather than adding
+unnecessary linkability. Tenant-specific secure views remain the active model;
+the Enterprise-only shared row-access-policy path is documented but is not
+applied until the product actually adopts a shared semantic view.
+
 Build:
 
 - HMAC respondent pseudonyms if a future source contract requires stable
@@ -566,10 +575,10 @@ Gate:
 
 ## 12. Definition of done
 
-The core demo is complete at Milestone 4. Milestone 5 adds production
-hardening, and Milestone 6 is the AWS infrastructure extension; neither is a
-blocker for demonstrating Snowflake, dbt, data correctness, meaningful
-analysis, governance, and product thinking.
+The production-shaped Snowflake demo is complete at Milestone 5. Milestone 6
+is the optional AWS infrastructure extension and is not a blocker for
+demonstrating Snowflake, dbt, data correctness, meaningful analysis,
+governance, product thinking, and operational readiness.
 
 The repository is done when a new developer can follow the README, connect their own Snowflake account, run a reset/build command, reproduce all mutation scenarios, pass the tests, and deliver the five-minute demo without undocumented manual fixes.
 
@@ -589,5 +598,7 @@ The first source-to-mart slice was delivered in this order:
 
 That sequencing kept product work behind a passing empty-database build.
 Milestone 2 subsequently proved mutation and rebuild correctness, and
-Milestone 3 delivered the code-owned API and dashboard. The next implementation
-slice is Milestone 4's analytical semantic layer and drill-down workflow.
+Milestone 3 delivered the code-owned API and dashboard, Milestone 4 added the
+analytical semantic layer, and Milestone 5 added workload isolation and
+operational evidence. The remaining optional slice is Milestone 6's AWS
+landing and Snowpipe transport.

@@ -20,6 +20,7 @@ only aggregated, non-diagnostic wellbeing indicators.
 - [Milestone 2: incremental correctness](docs/milestone-2-incremental-correctness.md)
 - [Milestone 3: aggregate dashboard](docs/milestone-3-dashboard.md)
 - [Milestone 4: analytical depth](docs/milestone-4-analytics.md)
+- [Milestone 5: production hardening](docs/milestone-5-production-hardening.md)
 - [Dataset profile and handling rules](data/README.md)
 - [Power BI dashboard runbook](docs/power-bi-dashboard.md)
 
@@ -48,6 +49,12 @@ Milestone 4 is implemented: catalogue-driven definitions, suppression-aware
 school and category analysis, weighted trust benchmarks, question change
 drivers, ordered distributions, analyst queries, and filtered aggregate CSV
 export extend the dashboard into a traceable analytical workflow.
+
+Milestone 5 is implemented: workload-isolated service-user definitions,
+immediate pipeline-run auditing, dbt source freshness, Account Usage health
+and warehouse-credit evidence, an observer-only secure view, and repeatable
+recovery, credential-rotation, and tenant-isolation checks harden the demo for
+a hosted deployment.
 
 ## Source data
 

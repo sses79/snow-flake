@@ -3,7 +3,7 @@ DBT ?= .venv/bin/dbt
 
 .NOTPARALLEL: demo-build
 
-.PHONY: generate test demo-reset demo-load demo-load-m1 demo-load-m2 demo-build dbt-build verify-milestone-2 verify-milestone-4 dashboard-dev dashboard-test dashboard-build
+.PHONY: generate test demo-reset demo-load demo-load-m1 demo-load-m2 demo-build dbt-build dbt-freshness verify-milestone-2 verify-milestone-4 verify-milestone-5 dashboard-dev dashboard-test dashboard-build
 
 generate:
 	node apps/generator/src/cli.ts
@@ -25,6 +25,9 @@ demo-load: demo-load-m1 demo-load-m2
 dbt-build:
 	DBT=$(DBT) ./scripts/dbt-build.sh
 
+dbt-freshness:
+	DBT=$(DBT) ./scripts/dbt-command.sh source freshness
+
 demo-build: test demo-load dbt-build
 
 verify-milestone-2: test
@@ -41,3 +44,6 @@ dashboard-build:
 	pnpm --dir apps/dashboard build
 
 verify-milestone-4: test dashboard-build dbt-build
+
+verify-milestone-5:
+	./scripts/verify-milestone-5.sh

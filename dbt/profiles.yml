@@ -13,3 +13,4 @@ school_wellbeing_demo:
       schema: STAGING
       threads: 4
       client_session_keep_alive: false
+      query_tag: wellbeing_demo_dbt

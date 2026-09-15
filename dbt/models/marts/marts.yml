@@ -66,6 +66,25 @@ models:
         data_tests: [not_null, unique]
       - name: last_loaded_at
         data_tests: [not_null]
+  - name: mart_pipeline_health
+    description: One-row operational summary combining audit, load, query, and warehouse metering evidence.
+    columns:
+      - name: observed_at
+        data_tests: [not_null]
+      - name: operational_status
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [HEALTHY, ATTENTION, STALE, NO_DATA]
+      - name: raw_row_count
+        data_tests: [not_null]
+      - name: failed_load_count_7d
+        data_tests: [not_null]
+      - name: failed_query_count_24h
+        data_tests: [not_null]
+      - name: total_credits_30d
+        data_tests: [not_null]
   - name: mart_school_indicator_analysis
     description: Suppression-aware school indicator metrics with prior-period and trust comparisons.
     columns:
