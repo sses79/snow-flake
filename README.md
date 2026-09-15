@@ -35,7 +35,13 @@ transformed by tested dbt models into a school wellbeing trend mart.
 Milestone 2 is implemented: deterministic mutation and replay batches exercise
 inserts, corrections, duplicate delivery, late older versions, and withdrawals.
 Incremental latest-state and response-fact models are tested against a
-full-refresh rebuild; Milestone 3 is next.
+full-refresh rebuild.
+
+Milestone 3 is implemented in code: aggregate distribution, support-signal,
+and freshness marts feed tenant-specific secure views, and the Next.js
+dashboard queries those views from a server-only Snowflake adapter. See the
+[dashboard runbook](docs/milestone-3-dashboard.md). The account deployment
+must be completed with valid Snowflake runtime credentials.
 
 ## Source data
 

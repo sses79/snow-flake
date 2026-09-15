@@ -36,7 +36,7 @@ The source is a public survey dataset, augmented only with clearly labelled fict
 | Milestone 0 — account connection and guardrails | Complete | Rerunnable Snowflake bootstrap, least-privilege roles, workload warehouses, and cost monitor |
 | Milestone 1 — first source-to-mart vertical slice | Complete | Deterministic 21,954-event batch, tested dbt mart, tenant-safe secure views, and a published Power BI trend report |
 | Milestone 2 — incremental correctness | Complete | Deterministic mutations, duplicate delivery history, incremental state/fact models, 40 passing dbt nodes, and full-refresh equivalence |
-| Milestone 3 — product surface | Next | The code-owned Next.js API and dashboard remain to be implemented |
+| Milestone 3 — product surface | Implemented; account deployment pending | Next.js API/UI, aggregate marts, tenant secure views, and browser-boundary tests are versioned; deploy after renewing runtime credentials |
 | Milestones 4–5 | Planned | Governance evidence and the AWS ingestion extension remain deliberately deferred |
 
 The Power BI report is an early validation of the Milestone 1 mart and secure

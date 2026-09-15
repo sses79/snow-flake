@@ -7,7 +7,7 @@
   },
   "scripts": {
     "generate": "node apps/generator/src/cli.ts",
-    "test": "node --test apps/generator/test/*.test.ts",
-    "typecheck": "node --run generate -- --help"
+    "test": "node --test apps/generator/test/*.test.ts && pnpm --dir apps/dashboard test",
+    "typecheck": "node --run generate -- --help && pnpm --dir apps/dashboard typecheck"
   }
 }

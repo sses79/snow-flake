@@ -14,3 +14,41 @@ models:
         data_tests: [not_null]
       - name: eligible_submission_count
         data_tests: [not_null]
+  - name: mart_question_response_distribution
+    description: Aggregate answer distribution by fictional school, period, and question.
+    columns:
+      - name: trust_id
+        data_tests: [not_null]
+      - name: school_id
+        data_tests: [not_null]
+      - name: question_code
+        data_tests: [not_null]
+      - name: answer_value
+        data_tests: [not_null]
+      - name: response_count
+        data_tests: [not_null]
+  - name: mart_support_signal_summary
+    description: Aggregate, non-diagnostic product support signals derived from adverse-response rules.
+    columns:
+      - name: trust_id
+        data_tests: [not_null]
+      - name: school_id
+        data_tests: [not_null]
+      - name: support_signal_category
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [emotional_wellbeing, peer_relationships, safety, school_support, physical_wellbeing]
+      - name: product_signal_level
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [lower, watch, elevated]
+  - name: mart_data_freshness
+    description: Aggregate load and source timestamps by fictional trust.
+    columns:
+      - name: trust_id
+        data_tests: [not_null, unique]
+      - name: last_loaded_at
+        data_tests: [not_null]

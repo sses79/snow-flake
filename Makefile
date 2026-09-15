@@ -3,7 +3,7 @@ DBT ?= .venv/bin/dbt
 
 .NOTPARALLEL: demo-build
 
-.PHONY: generate test demo-reset demo-load demo-load-m1 demo-load-m2 demo-build dbt-build verify-milestone-2
+.PHONY: generate test demo-reset demo-load demo-load-m1 demo-load-m2 demo-build dbt-build verify-milestone-2 dashboard-dev dashboard-test dashboard-build
 
 generate:
 	node apps/generator/src/cli.ts
@@ -30,3 +30,13 @@ demo-build: test demo-load dbt-build
 
 verify-milestone-2: test
 	./scripts/verify-milestone-2.sh
+
+dashboard-dev:
+	@test -f .env || (echo "Missing .env; copy .env.example and configure Snowflake." >&2; exit 1)
+	set -a; source .env; set +a; pnpm --dir apps/dashboard dev
+
+dashboard-test:
+	pnpm --dir apps/dashboard test
+
+dashboard-build:
+	pnpm --dir apps/dashboard build

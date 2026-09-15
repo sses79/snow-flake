@@ -8,9 +8,15 @@ generated-data/
 
 # Local credentials and tool state
 .env
+.env.local
+.env.*.local
 .venv/
 node_modules/
+.pnpm-store/
 target/
+apps/dashboard/.next/
+*.tsbuildinfo
 dbt_packages/
 logs/
+snowflake.log
 dbt/.user.yml
