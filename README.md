@@ -9,6 +9,27 @@ The project uses fictional trust, school, tenant, and pipeline metadata. It
 does not introduce real pupil identities, and the planned dashboard exposes
 only aggregated, non-diagnostic wellbeing indicators.
 
+## Dashboard preview
+
+The dashboard turns tested aggregate marts into an analyst workflow: compare
+fictional schools with their trust benchmark, inspect changes between survey
+periods, identify question-level drivers, and review the ordered answer
+distribution behind an indicator. All screenshots contain synthetic
+demonstration data and no real pupils.
+
+![All-schools wellbeing analysis dashboard](images/all-schools.png)
+
+| Indicator trend and trust comparison | Ordered response evidence |
+|---|---|
+| ![Bullying-frequency trend by fictional school and trust benchmark](images/chart-1.png) | ![Aggregate ordered response distribution](images/chrt-2.png) |
+
+<details>
+<summary>View the focused single-school analysis</summary>
+
+![Single fictional school safety analysis](images/school-one.png)
+
+</details>
+
 ## Documentation
 
 - [80/20 Snowflake learning guide](snowflake-learning-guide.md)
