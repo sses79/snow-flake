@@ -6,7 +6,7 @@ import { SCHEMA_VERSION } from "./generator.ts";
 
 type AnswerValue = string | null;
 
-type WellbeingPayload = {
+export type WellbeingPayload = {
   trust_id: string;
   school_id: string;
   school_classification?: string | null;
@@ -17,7 +17,7 @@ type WellbeingPayload = {
   provenance?: Record<string, unknown>;
 };
 
-type WellbeingEnvelope = {
+export type WellbeingEnvelope = {
   event_id: string;
   collection: string;
   document_id: string;

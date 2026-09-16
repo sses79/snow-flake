@@ -9,6 +9,27 @@ The project uses fictional trust, school, tenant, and pipeline metadata. It
 does not introduce real pupil identities, and the planned dashboard exposes
 only aggregated, non-diagnostic wellbeing indicators.
 
+## Dashboard preview
+
+The dashboard turns tested aggregate marts into an analyst workflow: compare
+fictional schools with their trust benchmark, inspect changes between survey
+periods, identify question-level drivers, and review the ordered answer
+distribution behind an indicator. All screenshots contain synthetic
+demonstration data and no real pupils.
+
+![All-schools wellbeing analysis dashboard](images/all-schools.png)
+
+| Indicator trend and trust comparison | Ordered response evidence |
+|---|---|
+| ![Bullying-frequency trend by fictional school and trust benchmark](images/chart-1.png) | ![Aggregate ordered response distribution](images/chrt-2.png) |
+
+<details>
+<summary>View the focused single-school analysis</summary>
+
+![Single fictional school safety analysis](images/school-one.png)
+
+</details>
+
 ## Documentation
 
 - [80/20 Snowflake learning guide](snowflake-learning-guide.md)
@@ -21,6 +42,9 @@ only aggregated, non-diagnostic wellbeing indicators.
 - [Milestone 3: aggregate dashboard](docs/milestone-3-dashboard.md)
 - [Milestone 4: analytical depth](docs/milestone-4-analytics.md)
 - [Milestone 5: production hardening](docs/milestone-5-production-hardening.md)
+- [Milestone 6: S3 and Snowpipe](docs/milestone-6-s3-snowpipe.md)
+- [Project closeout, achievements, and lessons](docs/project-outcomes-and-lessons.md)
+- [DuckDB, AWS, dashboard, and Power BI replacement handover](docs/duckdb-power-bi-handover.md)
 - [Dataset profile and handling rules](data/README.md)
 - [Power BI dashboard runbook](docs/power-bi-dashboard.md)
 
@@ -56,6 +80,20 @@ and warehouse-credit evidence, an observer-only secure view, and repeatable
 recovery, credential-rotation, and tenant-isolation checks harden the demo for
 a hosted deployment.
 
+Milestone 6 is implemented: Terraform provisions an encrypted, versioned S3
+landing boundary and least-privilege Snowflake IAM role; S3 notifications feed
+Snowflake's managed SQS queue and auto-ingest pipe. The same generator
+manifests drive immutable AWS uploads, schema-drift/reject exercises, load
+history evidence, and an opt-in full replay from S3.
+
+The project has now reached its planned closeout. The
+[outcomes and lessons guide](docs/project-outcomes-and-lessons.md) records what
+was achieved, what the tests prove, the limitations, and the Snowflake account
+closure checklist. The
+[replacement-project handover](docs/duckdb-power-bi-handover.md) specifies how
+to retain the event contracts, analytics, dashboard, Power BI delivery, and
+existing AWS landing resources with DuckDB and `dbt-duckdb`.
+
 ## Source data
 
 The demo is based on the
@@ -71,3 +109,8 @@ Keep Snowflake connection configuration and authentication material outside
 the repository. Copy `.env.example` to the ignored `.env` file for non-secret
 local settings only. Never commit passwords, MFA codes, account identifiers,
 private keys, or source survey rows.
+
+AWS credentials also stay in the standard AWS CLI/provider credential chain.
+Terraform derives the active account rather than storing an account ID in the
+repository. Start the AWS extension with the
+[Milestone 6 runbook](docs/milestone-6-s3-snowpipe.md).

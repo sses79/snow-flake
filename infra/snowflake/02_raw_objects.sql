@@ -16,8 +16,8 @@ CREATE FILE FORMAT IF NOT EXISTS WELLBEING_NDJSON_FORMAT
   ALLOW_DUPLICATE = FALSE
   COMMENT = 'One wellbeing submission change envelope per line';
 
--- Local-first landing area. Milestone 6 can replace this ingestion adapter
--- with an external S3 stage while keeping the same raw table contract.
+-- Local-first landing area. Milestone 6 adds an external S3 stage as an
+-- interchangeable ingestion adapter while keeping the same raw contract.
 CREATE STAGE IF NOT EXISTS WELLBEING_INTERNAL_STAGE
   FILE_FORMAT = WELLBEING_NDJSON_FORMAT
   COMMENT = 'Immutable local-first wellbeing submission batches';

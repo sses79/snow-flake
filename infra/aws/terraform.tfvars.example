@@ -1,0 +1,13 @@
+# AWS CLI/provider authentication is discovered outside this repository.
+# The related aws-auth project uses eu-west-1, so this demo follows it.
+aws_region  = "eu-west-1"
+name_prefix = "sses79-wellbeing-demo"
+
+# Optional: override the account-derived globally unique name.
+# bucket_name = "your-globally-unique-bucket-name"
+
+# Manual fallback values. scripts/configure-snowpipe.sh normally captures them
+# into an ignored mode-0600 file during the three-phase handshake.
+# snowflake_iam_user_arn           = "arn:aws:iam::...:user/..."
+# snowflake_external_id            = "..."
+# snowpipe_notification_queue_arn  = "arn:aws:sqs:eu-west-1:...:..."

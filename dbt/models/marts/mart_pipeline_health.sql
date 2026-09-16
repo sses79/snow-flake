@@ -21,14 +21,20 @@ audit_summary as (
 
 copy_summary as (
     select
-        max(case when status = 'LOADED' then last_load_time end) as last_copy_success_at,
-        max(case when status != 'LOADED' then last_load_time end) as last_copy_failure_at,
-        max_by(case when status != 'LOADED' then file_name end,
-            case when status != 'LOADED' then last_load_time end) as last_copy_failed_file,
-        coalesce(count_if(status != 'LOADED' and last_load_time >= dateadd(day, -7, current_timestamp())), 0) as account_failed_load_count_7d
-    from snowflake.account_usage.load_history
-    where catalog_name = 'SCHOOL_WELLBEING_DEMO'
-      and schema_name = 'RAW'
+        max(case when upper(replace(status, ' ', '_')) = 'LOADED' then last_load_time end) as last_copy_success_at,
+        max(case when upper(replace(status, ' ', '_')) in ('LOAD_FAILED', 'PARTIALLY_LOADED')
+            then last_load_time end) as last_copy_failure_at,
+        max_by(case when upper(replace(status, ' ', '_')) in ('LOAD_FAILED', 'PARTIALLY_LOADED')
+                then file_name end,
+            case when upper(replace(status, ' ', '_')) in ('LOAD_FAILED', 'PARTIALLY_LOADED')
+                then last_load_time end) as last_copy_failed_file,
+        coalesce(count_if(
+            upper(replace(status, ' ', '_')) in ('LOAD_FAILED', 'PARTIALLY_LOADED')
+            and last_load_time >= dateadd(day, -7, current_timestamp())
+        ), 0) as account_failed_load_count_7d
+    from snowflake.account_usage.copy_history
+    where table_catalog_name = 'SCHOOL_WELLBEING_DEMO'
+      and table_schema_name = 'RAW'
       and table_name = 'MONGO_WELLBEING_SUBMISSIONS'
 ),
 
@@ -147,5 +153,5 @@ select
         when configured_credit_price > 0
             then round(total_credits_30d * configured_credit_price, 2)
     end as approximate_cost_30d,
-    'ACCOUNT_USAGE can lag; PIPELINE_RUNS and RAW timestamps provide immediate load evidence.' as account_usage_latency_note
+    'ACCOUNT_USAGE COPY_HISTORY includes COPY and Snowpipe but can lag; RAW timestamps provide immediate load evidence.' as account_usage_latency_note
 from metrics
