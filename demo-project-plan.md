@@ -39,7 +39,7 @@ The source is a public survey dataset, augmented only with clearly labelled fict
 | Milestone 3 — product surface | Complete | Next.js API/UI, aggregate marts, tenant secure views, browser-boundary tests, and live PAT authentication through the north reader role |
 | Milestone 4 — analytical depth | Complete | Trust benchmarks, change drivers, interpretable metrics, analyst exports, and minimum-cohort suppression are implemented and live-verified |
 | Milestone 5 — production hardening | Complete | Workload service identities, source freshness, pipeline audit/health evidence, operational least privilege, and recovery/rotation acceptance checks |
-| Milestone 6 — AWS ingestion | Implemented | Terraform S3/IAM plus Snowflake-managed SQS and Snowpipe retain the same raw/dbt contract |
+| Milestone 6 — AWS ingestion | Complete | Terraform S3/IAM plus Snowflake-managed SQS and Snowpipe retain the same raw/dbt contract; live auto-ingest, rejection, rebuild, and no-drift gates passed |
 
 The Power BI report is an early validation of the Milestone 1 mart and secure
 reader boundary. It does not replace Milestone 3's Next.js dashboard or
@@ -584,7 +584,17 @@ infrastructure remains optional and is not a blocker for
 demonstrating Snowflake, dbt, data correctness, meaningful analysis,
 governance, product thinking, and operational readiness.
 
-The repository is done when a new developer can follow the README, connect their own Snowflake account, run a reset/build command, reproduce all mutation scenarios, pass the tests, and deliver the five-minute demo without undocumented manual fixes.
+Project closeout evidence and transferable lessons are recorded in
+[`docs/project-outcomes-and-lessons.md`](docs/project-outcomes-and-lessons.md).
+The Snowflake-free successor specification, including ownership of retained AWS
+resources, is in
+[`docs/duckdb-power-bi-handover.md`](docs/duckdb-power-bi-handover.md).
+
+The original Snowflake delivery met this definition through the documented
+live gates: a developer could follow the README, connect a Snowflake account,
+run the build/verification commands, reproduce the mutation scenarios, and
+deliver the demo without an undocumented data-path fix. Future reproducibility
+without a Snowflake account is owned by the replacement-project handover.
 
 ## 13. First implementation slice — completed
 

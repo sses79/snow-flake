@@ -22,6 +22,8 @@ only aggregated, non-diagnostic wellbeing indicators.
 - [Milestone 4: analytical depth](docs/milestone-4-analytics.md)
 - [Milestone 5: production hardening](docs/milestone-5-production-hardening.md)
 - [Milestone 6: S3 and Snowpipe](docs/milestone-6-s3-snowpipe.md)
+- [Project closeout, achievements, and lessons](docs/project-outcomes-and-lessons.md)
+- [DuckDB, AWS, dashboard, and Power BI replacement handover](docs/duckdb-power-bi-handover.md)
 - [Dataset profile and handling rules](data/README.md)
 - [Power BI dashboard runbook](docs/power-bi-dashboard.md)
 
@@ -62,6 +64,14 @@ landing boundary and least-privilege Snowflake IAM role; S3 notifications feed
 Snowflake's managed SQS queue and auto-ingest pipe. The same generator
 manifests drive immutable AWS uploads, schema-drift/reject exercises, load
 history evidence, and an opt-in full replay from S3.
+
+The project has now reached its planned closeout. The
+[outcomes and lessons guide](docs/project-outcomes-and-lessons.md) records what
+was achieved, what the tests prove, the limitations, and the Snowflake account
+closure checklist. The
+[replacement-project handover](docs/duckdb-power-bi-handover.md) specifies how
+to retain the event contracts, analytics, dashboard, Power BI delivery, and
+existing AWS landing resources with DuckDB and `dbt-duckdb`.
 
 ## Source data
 
