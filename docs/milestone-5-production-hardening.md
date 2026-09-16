@@ -58,7 +58,7 @@ estimate and excludes non-warehouse services.
 
 - the immediate `GOVERNANCE.PIPELINE_RUNS` audit written by `load-batch.sh`;
 - raw-table timestamps and row counts;
-- `ACCOUNT_USAGE.LOAD_HISTORY` for completed `COPY` outcomes;
+- `ACCOUNT_USAGE.COPY_HISTORY` for completed `COPY` and Snowpipe outcomes;
 - `ACCOUNT_USAGE.QUERY_HISTORY` for unexpected workload query failures; and
 - `ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY` for 24-hour and 30-day credits.
 

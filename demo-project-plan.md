@@ -39,7 +39,7 @@ The source is a public survey dataset, augmented only with clearly labelled fict
 | Milestone 3 — product surface | Complete | Next.js API/UI, aggregate marts, tenant secure views, browser-boundary tests, and live PAT authentication through the north reader role |
 | Milestone 4 — analytical depth | Complete | Trust benchmarks, change drivers, interpretable metrics, analyst exports, and minimum-cohort suppression are implemented and live-verified |
 | Milestone 5 — production hardening | Complete | Workload service identities, source freshness, pipeline audit/health evidence, operational least privilege, and recovery/rotation acceptance checks |
-| Milestone 6 — AWS ingestion | Planned | The S3, SQS, and Snowpipe extension remains deliberately deferred |
+| Milestone 6 — AWS ingestion | Implemented | Terraform S3/IAM plus Snowflake-managed SQS and Snowpipe retain the same raw/dbt contract |
 
 The Power BI report is an early validation of the Milestone 1 mart and secure
 reader boundary. It does not replace Milestone 3's Next.js dashboard or
@@ -532,6 +532,10 @@ Gate:
 
 ### Milestone 6 — S3 and Snowpipe upgrade
 
+Status: **implemented (2026-09-15)**. Deployment remains account-specific and
+uses the three-phase handshake runbook in
+[`docs/milestone-6-s3-snowpipe.md`](docs/milestone-6-s3-snowpipe.md).
+
 Prerequisite: an AWS account or sandbox with permission to create an S3 bucket, SQS notification, and IAM role/policy.
 
 Build:
@@ -575,8 +579,8 @@ Gate:
 
 ## 12. Definition of done
 
-The production-shaped Snowflake demo is complete at Milestone 5. Milestone 6
-is the optional AWS infrastructure extension and is not a blocker for
+The production-shaped Snowflake demo is complete through Milestone 6. The AWS
+infrastructure remains optional and is not a blocker for
 demonstrating Snowflake, dbt, data correctness, meaningful analysis,
 governance, product thinking, and operational readiness.
 
@@ -599,6 +603,6 @@ The first source-to-mart slice was delivered in this order:
 That sequencing kept product work behind a passing empty-database build.
 Milestone 2 subsequently proved mutation and rebuild correctness, and
 Milestone 3 delivered the code-owned API and dashboard, Milestone 4 added the
-analytical semantic layer, and Milestone 5 added workload isolation and
-operational evidence. The remaining optional slice is Milestone 6's AWS
-landing and Snowpipe transport.
+analytical semantic layer, Milestone 5 added workload isolation and
+operational evidence, and Milestone 6 added the optional AWS landing and
+Snowpipe transport.

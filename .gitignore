@@ -20,3 +20,13 @@ dbt_packages/
 logs/
 snowflake.log
 dbt/.user.yml
+
+# Terraform working state and local Snowflake/AWS handshake values
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+!*.tfvars.example
+terraform.auto.tfvars.json
+crash.log
