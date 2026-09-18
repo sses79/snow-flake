@@ -1,5 +1,10 @@
 # Milestone 1 Learning Guide
 
+> **Project status:** This guide intentionally preserves the Milestone 1
+> baseline. For final counts and evidence after all mutation, dashboard,
+> hardening, and Snowpipe work, see
+> [`project-outcomes-and-lessons.md`](project-outcomes-and-lessons.md).
+
 This guide records the baseline vertical slice. Mutation and incremental
 behavior added later is documented in
 [`milestone-2-incremental-correctness.md`](milestone-2-incremental-correctness.md).
@@ -162,10 +167,11 @@ invariants:
 - answered plus missing equals eligible, and adverse never exceeds answered.
 
 Schema tests add non-null, uniqueness, and accepted-domain checks. Together
-they prove the initial upsert-only slice. They do not yet exercise corrected
-versions, duplicates, late older events, or withdrawal tombstones—even though
-the latest/current SQL anticipates those operations. The fixed raw/fact count
-tests must evolve when Milestone 2 deliberately adds history.
+they prove the initial upsert-only slice. Milestone 1 alone did not exercise
+corrected versions, duplicates, late older events, or withdrawal
+tombstones—even though the latest/current SQL anticipates those operations.
+The fixed raw/fact count tests evolved when Milestone 2 deliberately added
+history.
 
 Transferable lesson: state what a test fixture proves and what it cannot prove;
 future events often invalidate exact counts without invalidating the model.
@@ -199,11 +205,11 @@ one event per raw row, a unique answer-level fact, reconciled aggregate
 measures, and sufficient loader/transformer privileges. The documented product
 query can compare adverse-response rates between fictional survey periods.
 
-The current evidence does not prove a captured `demo-reset && demo-build`
+Milestone 1 evidence did not prove a captured `demo-reset && demo-build`
 sequence from empty state, mutation correctness, incremental/full-refresh
-equivalence, source freshness, tenant row policies, cohort suppression, or a
-dashboard. Those are delivery or later-milestone boundaries rather than hidden
-Milestone 1 behavior.
+equivalence, source freshness, tenant isolation, cohort suppression, or a
+dashboard. Later milestones added those checks; they are not retroactively
+claimed as Milestone 1 behavior.
 
 ## Try It Safely
 

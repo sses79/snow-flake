@@ -1,9 +1,14 @@
 # Milestone 5: production hardening and operational evidence
 
+> **Project status:** The hardening objects and acceptance checks were
+> implemented and verified. The identity and operational commands below are a
+> historical live-account runbook, not steps to run after account closure.
+
 Milestone 5 separates runtime identities, records every attempted batch, adds
-source freshness, and exposes a one-row operational health contract. It keeps
-the personal `SSES79` PAT working locally, but provides distinct service users
-for a hosted loader, dbt runner, tenant dashboard, and observer.
+source freshness, and exposes a one-row operational health contract. The
+verified local setup kept the existing personal PAT working, while the
+infrastructure defined distinct service users for a hosted loader, dbt runner,
+tenant dashboard, and observer.
 
 ## Runtime boundaries
 

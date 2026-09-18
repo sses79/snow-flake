@@ -1,5 +1,9 @@
 # Milestone 1: first source-to-mart vertical slice
 
+> **Project status:** This runbook records the historical baseline. Its live
+> Snowflake commands require an active demo account; use local generator tests
+> or the replacement-project handover after account retirement.
+
 This runbook records the baseline build. For corrections, duplicate delivery,
 late versions, withdrawals, and incremental/full-refresh equivalence, continue
 with [`milestone-2-incremental-correctness.md`](milestone-2-incremental-correctness.md).
@@ -16,7 +20,9 @@ with [`milestone-2-incremental-correctness.md`](milestone-2-incremental-correctn
   ```
 
 - Copy `.env.example` to `.env` and fill in the Snowflake connection, account,
-  and user. The default dbt authenticator opens the Snowflake browser login.
+  and user. The default dbt authenticator opens the Snowflake browser login;
+  `scripts/dbt-command.sh` also supports the external PAT-file settings shown
+  in `.env.example` for a non-interactive local run.
 
 ## Build and verify
 

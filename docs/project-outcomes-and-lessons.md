@@ -246,8 +246,19 @@ Complete these steps before closing the account:
    final evidence/export is complete.
 8. Remove local `.env` Snowflake settings and any cached credentials. Do not
    commit them as part of archival work.
-9. Confirm the AWS bucket still has a lifecycle policy and no dead event
-   destination after the account is closed.
+9. Cancel the separate CoCo subscription, if active. CoCo billing is not the
+   same as Snowflake warehouse/storage billing and should not be assumed to
+   end with account closure.
+10. For a trial, self-service, or last organization account, open a Snowflake
+    Support case requesting cancellation; it cannot be dropped from that same
+    account in Snowsight. Ask Support to confirm the cancellation date, final
+    balance, and that no further charges will occur.
+11. Confirm the AWS bucket still has a lifecycle policy and no dead event
+    destination after the account is closed.
+
+Official references: [trial cancellation](https://docs.snowflake.com/en/user-guide/admin-trial-account),
+[Support cases](https://docs.snowflake.com/en/user-guide/ui-support), and
+[account deletion constraints](https://docs.snowflake.com/en/user-guide/organizations-manage-accounts-delete).
 
 The landing prefix also contains the deliberate
 `batch_m6_02_rejected_file` fixture. A replacement loader must quarantine or

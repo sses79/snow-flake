@@ -993,10 +993,19 @@ Do not make account closure the first migration step. Use this order:
 6. Remove the Snowflake queue ARN, external ID, IAM trust, and unused role from
    the desired AWS configuration.
 7. Export only required aggregate evidence or report artifacts from Snowflake.
-8. Revoke/delete local PAT files and connection entries, then close the
-   Snowflake account.
-9. Confirm the S3 bucket has no dead notification target and the new project
-   can rebuild from retained valid landing objects.
+8. Revoke/delete local PAT files and connection entries. Cancel any separate
+   CoCo subscription independently.
+9. If this is a trial, self-service, or last organization account, submit a
+   Snowflake Support case requesting cancellation and confirmation that no
+   further charges will occur. Letting a trial expire suspends it; it is not a
+   formal closure request.
+10. Confirm the S3 bucket has no dead notification target and the new project
+    can rebuild from retained valid landing objects.
 
 This sequence preserves the useful AWS investment while making Snowflake a
 closed implementation chapter rather than a hidden runtime dependency.
+
+Use Snowflake's current documentation for
+[trial cancellation](https://docs.snowflake.com/en/user-guide/admin-trial-account),
+[Support cases](https://docs.snowflake.com/en/user-guide/ui-support), and
+[account deletion constraints](https://docs.snowflake.com/en/user-guide/organizations-manage-accounts-delete).

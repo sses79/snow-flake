@@ -1,5 +1,10 @@
 # Milestone 2: incremental correctness
 
+> **Project status:** This runbook records the internal-stage acceptance state.
+> Milestone 6 later delivered some of the same logical events through S3, so
+> final raw physical-delivery counts are intentionally higher and
+> transport-dependent. Logical latest/current results remain stable.
+
 Milestone 2 proves that the append-only raw history produces the same current
 state whether dbt processes new logical events incrementally or rebuilds from
 all history. The fixture covers inserts, a correction, an exact duplicate, an
@@ -28,7 +33,8 @@ contains batch IDs and counts only.
 
 ## Incremental model behavior
 
-The warehouse retains three distinct grains:
+Immediately after the Milestone 2 internal-stage fixtures, the warehouse
+retained these distinct grains:
 
 ```text
 RAW history                     21,961 physical deliveries
@@ -121,3 +127,6 @@ The Milestone 2 singular tests prove that:
 
 If dbt uses `externalbrowser` authentication and reports an OAuth callback
 timeout, rerun the command and complete the identity-provider browser prompt.
+For the non-interactive PAT-file path used later in the project, use the
+variables documented in `.env.example`; do not copy the token into this file or
+the repository.
