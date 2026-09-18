@@ -1,5 +1,9 @@
 # Milestone 3: aggregate dashboard
 
+> **Project status:** The dashboard was implemented and verified. These live
+> Snowflake instructions are retained as a reproducible runbook and require an
+> active account.
+
 Milestone 3 adds a code-owned Next.js dashboard without moving Snowflake
 authentication into the browser. The browser calls `/api/dashboard`; the API
 uses the official Snowflake Node.js driver on the server and returns only
@@ -10,7 +14,7 @@ browser -> Next.js /api/dashboard -> tenant reader role -> secure views
         <- aggregate JSON only    <- APP warehouse      <- aggregate marts
 ```
 
-The current deployment selects one tenant with `DASHBOARD_TENANT`. Run a
+Each deployment selects one tenant with `DASHBOARD_TENANT`. Run a
 separate deployment for another trust. Do not let a browser parameter select a
 tenant, role, or Snowflake view.
 
@@ -57,10 +61,10 @@ not receive `SELECT` on the shared marts.
 
 ## Runtime identity
 
-The personal demo intentionally reuses the existing `SSES79` PAT while the
-server forces `WELLBEING_DEMO_TRUST_NORTH_READER` for application queries. A
-hosted production deployment should instead use a dedicated service identity
-whose only project role is the matching tenant reader role.
+The verified personal demo reused an existing human user's PAT while the
+server forced `WELLBEING_DEMO_TRUST_NORTH_READER` for application queries.
+Milestone 5 added dedicated service-user definitions for hosted deployments;
+each dashboard identity receives only its matching tenant reader role.
 
 Copy the Milestone 3 entries from `.env.example` to the ignored `.env`. The
 dashboard accepts either:
@@ -91,7 +95,7 @@ The tests also prove that every qualified object referenced by application SQL
 belongs to the selected tenant's hard-coded secure-view allowlist and that
 filter values are Snowflake binds. Before any public deployment, add your
 organisation's application authentication in front of the dashboard; the
-current milestone is intended for local/private demonstration.
+implemented dashboard is intended for local/private demonstration.
 
 ## Product interpretation
 

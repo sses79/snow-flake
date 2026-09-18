@@ -1,5 +1,9 @@
 # Milestone 0 - Snowflake Account Connection and Guardrails
 
+> **Project status:** This is the historical bootstrap runbook. The project was
+> completed through Milestone 6 and is now in account-retirement/handover mode.
+> Run these live commands only while the demo Snowflake account remains active.
+
 ## Outcome
 
 At the end of this milestone:
@@ -24,8 +28,8 @@ In Snowsight, open the account details and record these locally:
 | Username           | `TIM`                            | Your existing Snowflake user                                    |
 | Authentication     | password + MFA, SSO, or key pair | Human password users should expect MFA                          |
 | Bootstrap role     | `ACCOUNTADMIN` or equivalent     | Needed for the first resource monitor and grants                |
-| Account edition    | Standard, Enterprise, etc.       | Row-access policies used later may depend on available features |
-| Cloud and region   | e.g. AWS `eu-west-2`             | Needed when the project adds S3/Snowpipe                        |
+| Account edition    | Standard, Enterprise, etc.       | Record the available feature boundary; this project ultimately used tenant-specific secure views rather than a shared row-access policy |
+| Cloud and region   | e.g. AWS `eu-west-2`             | Needed for storage-integration planning; the implemented AWS landing resources default to `eu-west-1` |
 
 You do not need to send any credential or private key to the project or commit it to Git.
 
@@ -143,6 +147,7 @@ Roles
   WELLBEING_DEMO_TRANSFORMER
   WELLBEING_DEMO_TRUST_NORTH_READER
   WELLBEING_DEMO_TRUST_SOUTH_READER
+  WELLBEING_DEMO_OBSERVER
 
 Resource monitor
   WELLBEING_DEMO_MONITOR
@@ -169,11 +174,14 @@ CREATE ROLE IF NOT EXISTS WELLBEING_DEMO_TRUST_NORTH_READER
   COMMENT = 'Reads north tenant secure views only';
 CREATE ROLE IF NOT EXISTS WELLBEING_DEMO_TRUST_SOUTH_READER
   COMMENT = 'Reads south tenant secure views only';
+CREATE ROLE IF NOT EXISTS WELLBEING_DEMO_OBSERVER
+  COMMENT = 'Reads only the operational health surface';
 
 GRANT ROLE WELLBEING_DEMO_LOADER TO ROLE WELLBEING_DEMO_ADMIN;
 GRANT ROLE WELLBEING_DEMO_TRANSFORMER TO ROLE WELLBEING_DEMO_ADMIN;
 GRANT ROLE WELLBEING_DEMO_TRUST_NORTH_READER TO ROLE WELLBEING_DEMO_ADMIN;
 GRANT ROLE WELLBEING_DEMO_TRUST_SOUTH_READER TO ROLE WELLBEING_DEMO_ADMIN;
+GRANT ROLE WELLBEING_DEMO_OBSERVER TO ROLE WELLBEING_DEMO_ADMIN;
 GRANT ROLE WELLBEING_DEMO_ADMIN TO ROLE SYSADMIN;
 
 USE ROLE ACCOUNTADMIN;
@@ -181,8 +189,10 @@ USE ROLE ACCOUNTADMIN;
 GRANT CREATE DATABASE ON ACCOUNT TO ROLE WELLBEING_DEMO_ADMIN;
 GRANT CREATE WAREHOUSE ON ACCOUNT TO ROLE WELLBEING_DEMO_ADMIN;
 
--- Grant the working admin role to your existing human user.
-GRANT ROLE WELLBEING_DEMO_ADMIN TO USER <YOUR_SNOWFLAKE_USER>;
+-- Grant the working admin role to the authenticated bootstrap user.
+SET DEMO_BOOTSTRAP_USER = CURRENT_USER();
+GRANT ROLE WELLBEING_DEMO_ADMIN
+  TO USER IDENTIFIER($DEMO_BOOTSTRAP_USER);
 ```
 
 The child roles contain narrowly scoped runtime privileges. The admin role inherits them, and `SYSADMIN` inherits the complete custom hierarchy. Do not grant custom roles to `PUBLIC`.
@@ -257,6 +267,7 @@ CREATE FILE FORMAT IF NOT EXISTS WELLBEING_NDJSON_FORMAT
   TYPE = JSON
   COMPRESSION = AUTO
   STRIP_OUTER_ARRAY = FALSE
+  ALLOW_DUPLICATE = FALSE
   COMMENT = 'One wellbeing submission change envelope per line';
 
 CREATE STAGE IF NOT EXISTS WELLBEING_INTERNAL_STAGE
@@ -271,6 +282,21 @@ CREATE TABLE IF NOT EXISTS MONGO_WELLBEING_SUBMISSIONS (
   LOAD_RUN_ID STRING
 )
 COMMENT = 'Append-only Mongo-shaped wellbeing submission changes';
+
+CREATE TABLE IF NOT EXISTS SCHOOL_WELLBEING_DEMO.GOVERNANCE.PIPELINE_RUNS (
+  RUN_ID STRING NOT NULL,
+  BATCH_ID STRING NOT NULL,
+  SOURCE_FILE STRING NOT NULL,
+  STATUS STRING NOT NULL,
+  EXPECTED_ROW_COUNT NUMBER NOT NULL,
+  OBSERVED_BATCH_ROW_COUNT NUMBER,
+  STARTED_AT TIMESTAMP_TZ NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  COMPLETED_AT TIMESTAMP_TZ,
+  EXIT_CODE NUMBER,
+  CONSTRAINT PIPELINE_RUNS_STATUS_CHECK
+    CHECK (STATUS IN ('RUNNING', 'SUCCEEDED', 'FAILED'))
+)
+COMMENT = 'Operational batch attempts without row-level survey content or credentials';
 ```
 
 Raw remains append-only. Do not add destructive deduplication, update, or delete logic to this table.
@@ -299,12 +325,21 @@ GRANT READ, WRITE ON STAGE SCHOOL_WELLBEING_DEMO.RAW.WELLBEING_INTERNAL_STAGE
   TO ROLE WELLBEING_DEMO_LOADER;
 GRANT INSERT, SELECT ON TABLE SCHOOL_WELLBEING_DEMO.RAW.MONGO_WELLBEING_SUBMISSIONS
   TO ROLE WELLBEING_DEMO_LOADER;
+GRANT USAGE ON SCHEMA SCHOOL_WELLBEING_DEMO.GOVERNANCE
+  TO ROLE WELLBEING_DEMO_LOADER;
+GRANT SELECT, INSERT, UPDATE ON TABLE
+  SCHOOL_WELLBEING_DEMO.GOVERNANCE.PIPELINE_RUNS
+  TO ROLE WELLBEING_DEMO_LOADER;
 
 GRANT USAGE ON DATABASE SCHOOL_WELLBEING_DEMO
   TO ROLE WELLBEING_DEMO_TRANSFORMER;
 GRANT USAGE ON SCHEMA SCHOOL_WELLBEING_DEMO.RAW
   TO ROLE WELLBEING_DEMO_TRANSFORMER;
 GRANT SELECT ON TABLE SCHOOL_WELLBEING_DEMO.RAW.MONGO_WELLBEING_SUBMISSIONS
+  TO ROLE WELLBEING_DEMO_TRANSFORMER;
+GRANT USAGE ON SCHEMA SCHOOL_WELLBEING_DEMO.GOVERNANCE
+  TO ROLE WELLBEING_DEMO_TRANSFORMER;
+GRANT SELECT ON TABLE SCHOOL_WELLBEING_DEMO.GOVERNANCE.PIPELINE_RUNS
   TO ROLE WELLBEING_DEMO_TRANSFORMER;
 GRANT USAGE ON SCHEMA SCHOOL_WELLBEING_DEMO.STAGING
   TO ROLE WELLBEING_DEMO_TRANSFORMER;
@@ -328,14 +363,22 @@ GRANT USAGE ON SCHEMA SCHOOL_WELLBEING_DEMO.MARTS
 GRANT USAGE ON SCHEMA SCHOOL_WELLBEING_DEMO.MARTS
   TO ROLE WELLBEING_DEMO_TRUST_SOUTH_READER;
 
--- Readers receive future secure views, not tables or RAW access.
-GRANT SELECT ON FUTURE VIEWS IN SCHEMA SCHOOL_WELLBEING_DEMO.MARTS
-  TO ROLE WELLBEING_DEMO_TRUST_NORTH_READER;
-GRANT SELECT ON FUTURE VIEWS IN SCHEMA SCHOOL_WELLBEING_DEMO.MARTS
-  TO ROLE WELLBEING_DEMO_TRUST_SOUTH_READER;
+-- Deliberately do not grant ALL or FUTURE views. After dbt builds the marts,
+-- 05_tenant_reader_views.sql grants each role only its own secure views.
+
+GRANT USAGE ON WAREHOUSE WELLBEING_DEMO_APP_WH
+  TO ROLE WELLBEING_DEMO_OBSERVER;
+GRANT USAGE ON DATABASE SCHOOL_WELLBEING_DEMO
+  TO ROLE WELLBEING_DEMO_OBSERVER;
+GRANT USAGE ON SCHEMA SCHOOL_WELLBEING_DEMO.MARTS
+  TO ROLE WELLBEING_DEMO_OBSERVER;
 ```
 
-The loader receives `SELECT` on raw only so it can perform post-load reconciliation. It has no update, delete, truncate, or schema-creation privilege.
+The loader receives `SELECT` on raw for post-load reconciliation and narrowly
+scoped writes to the non-sensitive run-audit table. It has no update, delete,
+truncate, or schema-creation privilege on raw. The executable script also gives
+the transformer bounded Snowflake Account Usage database roles needed by the
+Milestone 5 health mart; tenant readers never receive those roles.
 
 ## 9. Add the cost monitor
 
@@ -378,6 +421,7 @@ SHOW ROLES LIKE 'WELLBEING_DEMO%';
 SHOW GRANTS TO ROLE WELLBEING_DEMO_LOADER;
 SHOW GRANTS TO ROLE WELLBEING_DEMO_TRANSFORMER;
 SHOW GRANTS TO ROLE WELLBEING_DEMO_TRUST_NORTH_READER;
+SHOW GRANTS TO ROLE WELLBEING_DEMO_OBSERVER;
 ```
 
 ### Warehouse guardrails
@@ -443,20 +487,37 @@ Avoid `CREATE OR REPLACE` in bootstrap SQL because replacement can destroy or re
 
 ## 11. Service authentication boundary
 
-Use the human connection only for administration and local learning. Before the dashboard milestone, create a separate Snowflake service user and authenticate it with a key pair or the account's approved workload identity method. Snowflake CLI and the official Node.js driver both support key-pair authentication.
+Use the human connection only for administration and local learning. Milestone
+5 implemented credential-less service-user definitions in
+[`06_service_identities.sql`](../infra/snowflake/06_service_identities.sql) for
+the loader, transformer, both dashboards, and observer. A deployment must still
+attach its approved network policy and PAT, key pair, or workload identity.
+Snowflake CLI and the official Node.js driver both support key-pair
+authentication.
 
 The dashboard service user should receive only one tenant reader role and `WELLBEING_DEMO_APP_WH`; it should never receive loader, transformer, admin, or raw privileges. Never place a private key in the repository or browser bundle.
 
 ## 12. Safe teardown design
 
-Do not run teardown as part of normal builds. A future teardown script should target only the exact names listed in this guide and require an explicit confirmation variable. Its scope is:
+Do not run teardown as part of normal builds. The repository intentionally has
+no automated Snowflake teardown. An object-only teardown would need an explicit
+confirmation and exact names for:
 
 1. suspend and drop the three demo warehouses;
 2. drop `SCHOOL_WELLBEING_DEMO`;
 3. drop the demo resource monitor;
-4. revoke and drop only the five `WELLBEING_DEMO_*` roles.
+4. drop the pipe, external stage, storage integration, audit objects, and
+   service users added by later milestones; and
+5. revoke and drop only the six `WELLBEING_DEMO_*` roles.
 
 Never use a wildcard, environment-variable-expanded database name, or account-wide cleanup command for teardown.
+
+For full account retirement, do not substitute object teardown for formal
+cancellation. Follow
+[`project-outcomes-and-lessons.md`](project-outcomes-and-lessons.md#snowflake-account-closure-checklist):
+retain or migrate the AWS boundary first, cancel separate subscriptions, and
+ask Snowflake Support to close a trial, self-service, or last organization
+account.
 
 ## Completion checklist
 

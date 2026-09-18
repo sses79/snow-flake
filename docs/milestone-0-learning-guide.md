@@ -1,5 +1,9 @@
 # Milestone 0 Learning Guide
 
+> **Project status:** This guide explains the original foundation. Later
+> milestones are complete; links below distinguish what Milestone 0 proved by
+> itself from evidence added afterward.
+
 Milestone 0 does not move survey data. It creates the Snowflake boundary that makes every later load, model, and dashboard safer to build. The useful mental model is: identity selects a role, the role receives only the capabilities it needs, and each workload uses its own bounded compute.
 
 For the complete operator runbook, see [`milestone-0-account-setup.md`](milestone-0-account-setup.md). The executable source of truth is [`infra/snowflake/`](../infra/snowflake/).
@@ -14,26 +18,32 @@ ACCOUNTADMIN / SECURITYADMIN (bootstrap only)
         |
         v
 WELLBEING_DEMO_ADMIN
-   |          |                |
-   v          v                v
-LOADER    TRANSFORMER     TENANT READERS
-RAW write RAW read +       MARTS views only
-          model create
-   |          |                |
- LOAD_WH  TRANSFORM_WH       APP_WH
-        \     |              /
-         shared resource monitor
+   |          |                |              |
+   v          v                v              v
+LOADER    TRANSFORMER     TENANT READERS   OBSERVER
+RAW/audit RAW/audit read +  own secure      health view
+write     model create       views only       only
+   |          |                |              |
+ LOAD_WH  TRANSFORM_WH       APP_WH         APP_WH
+        \       |              |             /
+               shared resource monitor
 ```
 
 ## 1. Roles Describe Capabilities, Not People
 
-[`00_roles.sql`](../infra/snowflake/00_roles.sql) creates one administrative role and four narrow runtime roles. The admin role inherits the loader, transformer, and reader roles; `SYSADMIN` inherits the custom hierarchy. Only the bootstrap step switches to `ACCOUNTADMIN`, because global `CREATE DATABASE` and the later resource monitor require account-level authority.
+[`00_roles.sql`](../infra/snowflake/00_roles.sql) creates one administrative
+role and five narrow runtime roles. The admin role inherits the loader,
+transformer, two reader roles, and observer; `SYSADMIN` inherits the custom
+hierarchy. Only bootstrap and bounded Account Usage grants switch to
+`ACCOUNTADMIN`, because those privileges require account-level authority.
 
 [`03_grants.sql`](../infra/snowflake/03_grants.sql) turns those names into enforceable boundaries:
 
 - `WELLBEING_DEMO_LOADER` can use the load warehouse, write the internal stage, and insert/select raw rows. It cannot update, delete, truncate, or create models.
 - `WELLBEING_DEMO_TRANSFORMER` can read raw and create tables or views in `STAGING`, `CORE`, and `MARTS`. It cannot write the stage or mutate raw history.
 - Reader roles can use only the app warehouse and select mart views. They receive neither raw access nor mart-table access.
+- The observer can query only the secure one-row pipeline-health view; it
+  cannot query raw or analytical tables.
 
 The negative reader query in the runbook is therefore a feature: an insufficient-privileges error proves that sensitive raw rows are outside the reader capability.
 
@@ -69,7 +79,8 @@ The file format expects one JSON envelope per line and keeps outer-array strippi
 
 Raw is intentionally append-only. Corrections, latest-version selection, duplicates, and withdrawals are downstream modelling concerns. Updating raw rows would erase the evidence needed to replay or explain a result.
 
-The internal stage is an adapter, not the permanent architecture. Milestone 5 can replace it with S3/Snowpipe while keeping the raw table contract stable.
+The internal stage is an adapter, not the permanent architecture. Milestone 6
+added S3/Snowpipe while keeping the raw table contract stable.
 
 Transferable lesson: keep the ingestion contract stable and auditable so transport mechanisms can change independently.
 
@@ -124,7 +135,11 @@ The checks in [`milestone-0-account-setup.md`](milestone-0-account-setup.md) est
 - warehouses are X-Small, auto-suspending, and monitored;
 - rerunning setup preserves data and required grants.
 
-These are operator-run integration checks, not an automated test suite. They do not yet prove row-level tenant filtering, secure semantic views, cohort suppression, data loading, or dbt correctness. Those belong to later milestones.
+These are operator-run integration checks, not an automated test suite.
+Milestone 0 alone did not prove tenant-isolated secure views, cohort
+suppression, data loading, or dbt correctness. Milestones 1 through 6 later
+added and verified those boundaries; see
+[`project-outcomes-and-lessons.md`](project-outcomes-and-lessons.md).
 
 ## Try It Safely
 

@@ -1,5 +1,10 @@
 # Power BI dashboard runbook
 
+> **Project status:** This records the verified Snowflake-backed Power BI
+> report. It will stop refreshing after Snowflake retirement; the replacement
+> publication choices are documented in
+> [`duckdb-power-bi-handover.md`](duckdb-power-bi-handover.md).
+
 This runbook records the proven Power BI Service path for the Milestone 1
 wellbeing trend report. Power BI imports a tenant-filtered secure Snowflake
 view through a dedicated key-pair identity; it never receives access to the
@@ -169,6 +174,9 @@ Common failure modes:
 | `Opening this semantic model is not supported` | Web model editing is unavailable for that Pro workspace/region; create the report directly or use Fabric capacity/Desktop. |
 | `Cannot load model` after successful Snowflake preview | The Snowflake path is healthy; recreate the model/report in a supported Fabric-capacity workspace. |
 
-The Power BI report is useful Milestone 1 evidence and an early product
-validation. It does not replace Milestone 3's planned Next.js dashboard or
-Milestone 4's row-access policy, cohort suppression, and operational evidence.
+The Power BI report remains useful Milestone 1 evidence and early product
+validation. Milestone 3 subsequently delivered the Next.js dashboard, and
+Milestone 4 added richer analytical marts, object-specific tenant secure views,
+and cohort suppression. Milestone 5 added operational evidence. The original
+Power BI report still uses the narrower trend-view contract; it does not
+automatically inherit those later dashboard capabilities.

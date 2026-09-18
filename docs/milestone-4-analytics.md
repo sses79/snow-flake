@@ -1,5 +1,9 @@
 # Milestone 4: analytical depth and trustworthy insights
 
+> **Project status:** This analytical layer and dashboard workflow were
+> implemented and verified. Warehouse deployment commands require the demo
+> Snowflake account to remain active.
+
 Milestone 4 turns the question-level dashboard into an analyst workflow. It
 adds explicit metric definitions, prior-period movement, weighted trust
 benchmarks, category context, question-level change drivers, ordered response

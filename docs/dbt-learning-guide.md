@@ -1,5 +1,10 @@
 # dbt Learning Guide
 
+> **Project status:** The Snowflake implementation is complete through
+> Milestone 6. Warehouse commands in this guide require the demo account to
+> remain active; the modelling principles and local graph inspection remain
+> useful after retirement.
+
 dbt owns the transformation from append-only Snowflake JSON to an auditable
 school-level wellbeing mart. The useful mental model is: write one `select` per
 business step, connect steps with `ref()`, state each model's grain, and make
@@ -12,14 +17,20 @@ of truth is [`dbt/`](../dbt/).
 ## The 80/20 View
 
 ```text
-RAW JSON source (21,954 envelopes)
-  -> stg changes: typed columns                 [view]
-  -> int latest: newest event per document      [view]
-  -> int current: upserts only                  [view]
-  -> int answers: one row per answer (395,172)  [view]
-  -> response fact: adverse-response rule       [table]
-  -> school trend mart (2,376 groups)           [table]
+RAW JSON delivery history
+  -> stg changes: one typed row per logical event       [view]
+  -> int latest: one winning event per document         [incremental]
+  -> int current: current non-withdrawn documents       [view]
+  -> int answers: one row per document/question         [view]
+  -> response fact: curated answer and adverse rule     [incremental]
+  -> trend, distribution, indicator, category, driver,
+     support-signal, freshness, and health marts        [tables/views]
 ```
+
+The original Milestone 1 baseline contained 21,954 envelopes, 395,172 answer
+facts, and 2,376 trend groups. Later mutation and S3 deliveries deliberately
+made raw delivery counts transport-dependent while preserving logical current
+state.
 
 ## What “Mart” and “Source-to-Mart” Mean
 
@@ -147,8 +158,10 @@ YAML tests in [`staging.yml`](../dbt/models/staging/staging.yml),
 `dbt build` runs tests in DAG order. A failed upstream test prevents dependent
 nodes from building, which is stronger than running every model first and
 checking quality afterward. The Milestone 2 acceptance build produced 6 models
-and 33 tests; generated `dbt/target/run_results.json` records each node's status,
-timing, compiled SQL, relation, and Snowflake query ID.
+and 33 tests at that point in the project. The final graph grew to 14 models,
+98 data tests, and one unit test; the final incremental and full-refresh gate
+passed all 116 dbt nodes. Generated `dbt/target/run_results.json` records each
+node's status, timing, compiled SQL, relation, and Snowflake query ID.
 
 The expected batch counts prove this deterministic fixture, while grain,
 winner-selection, current-state reconciliation, and withdrawal tests express
@@ -204,14 +217,18 @@ mart with the expected counts, required identifiers, allowed operation/trust
 values, unique event IDs and answer grain, and reconciled mart measures. It
 also proves the transformer role can create and query the configured objects.
 
-It does not prove mutation-level idempotency, late-arriving updates, realistic
-delete handling, source freshness, tenant row policies, cohort suppression, or
-the clinical validity of the adverse-response rules. Those are explicit later
-boundaries; the adverse flag is a demo reporting rule, not a diagnosis.
+Milestone 1 evidence alone did not prove mutation-level idempotency,
+late-arriving updates, withdrawal handling, source freshness, tenant
+isolation, or cohort suppression. Subsequent milestones proved those technical
+boundaries and are summarized in
+[`project-outcomes-and-lessons.md`](project-outcomes-and-lessons.md). No test in
+this project establishes clinical validity; the adverse flag remains a demo
+reporting rule, not a diagnosis.
 
 ## Try It Safely
 
-Load the ignored environment before invoking dbt:
+While the Snowflake account remains active, load the ignored environment before
+invoking dbt:
 
 ```bash
 set -a
@@ -219,7 +236,8 @@ source .env
 set +a
 ```
 
-Start with commands that do not rebuild Snowflake relations:
+Start with commands that do not rebuild Snowflake relations. `dbt debug` still
+tests a live connection; `dbt ls` parses the graph without running model SQL:
 
 ```bash
 # Validate configuration and authentication.
@@ -241,6 +259,11 @@ build only the fact path:
 .venv/bin/dbt build --project-dir dbt --profiles-dir dbt \
   --select +fct_wellbeing_response
 ```
+
+After account retirement, do not run `dbt debug` or `dbt build` against this
+profile. Use the replacement project's `dbt-duckdb` target described in
+[`duckdb-power-bi-handover.md`](duckdb-power-bi-handover.md) for executable
+learning.
 
 Safe experiment: first predict whether `int_wellbeing_submission_latest` is an
 ancestor or descendant of the fact. Run the first `dbt ls` command and explain

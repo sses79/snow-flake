@@ -1,5 +1,10 @@
 # Milestone 6: S3 and Snowpipe
 
+> **Project status:** The AWS/Snowpipe path and live acceptance gate were
+> completed. Preserve or migrate the AWS resources before closing Snowflake;
+> the Snowflake-managed queue is not reusable afterward. Do not rerun live
+> verification against a retired account.
+
 Milestone 6 changes only the transport into the existing append-only raw
 table. The envelope, dbt models, secure views, API, and dashboard remain the
 same.
